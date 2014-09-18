@@ -76,10 +76,28 @@ public class IRCNumerics {
         return numeric(RPL_LUSERCHANNELS, String.valueOf(channels), "channels formed");
     }
 
-    public static final int RPL_LUSERME = 251;
+    public static final int RPL_LUSERME = 255;
 
     public Message rplLuserMe(int clients, int servers) {
         return numeric(RPL_LUSERME, "I have " + clients + " clients and " + servers + " servers");
+    }
+
+    public static final int RPL_MOTDSTART = 375;
+
+    public Message rplMotdStart() {
+        return numeric(RPL_MOTDSTART, "- " + prefix + " Message of the day - ");
+    }
+
+    public static final int RPL_MOTD = 372;
+
+    public Message rplMotd(String text) {
+        return numeric(RPL_MOTD, "- " + text);
+    }
+
+    public static final int RPL_ENDOFMOTD = 376;
+
+    public Message rplEndOfMotd() {
+        return numeric(RPL_ENDOFMOTD, "End of /MOTD comman");
     }
 
     public static final int ERR_NOSUCHNICK = 401;

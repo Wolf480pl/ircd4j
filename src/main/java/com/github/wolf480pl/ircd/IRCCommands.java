@@ -61,6 +61,7 @@ public class IRCCommands {
             user.send(user.numerics().errAlreadyRegistered());
         }
         luser(user);
+        motd(user);
     }
 
     public void quit(User user, List<String> args) {
@@ -89,6 +90,12 @@ public class IRCCommands {
 
         user.send(user.numerics().rplLuserClient(users, invisible, servers));
         user.send(user.numerics().rplLuserMe(myClients, myServers));
+    }
+
+    public void motd(User user) {
+        user.numerics().rplMotdStart();
+        user.numerics().rplMotd(" === TODO === "); //TODO
+        user.numerics().rplEndOfMotd();
     }
 
     protected boolean verifyNick(String nick) {
