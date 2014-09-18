@@ -119,6 +119,9 @@
     <resources>
       <!-- Static resources -->
       <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
         <filtering>false</filtering>
         <directory>.</directory>
         <targetPath>.</targetPath>

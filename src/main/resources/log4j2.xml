@@ -4,7 +4,7 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss} [%highlight{%-5level}] [%logger{36}] %msg%n"/>
     </Console>
-    <RollingFile name="RollingFile" fileName="cmd-example.log" filePattern="cmd-example.%i.log">
+    <RollingFile name="RollingFile" fileName="ircd.log" filePattern="ircd.%i.log">
       <PatternLayout pattern="%d{HH:mm:ss} [%-5level] %logger{36} - %msg%n"/>
       <SizeBasedTriggeringPolicy size="50000" />
     </RollingFile>
