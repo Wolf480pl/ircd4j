@@ -1,7 +1,7 @@
 /*
  * This file is part of java-lib-ircd.
  *
- * Copyright (c) ${inceptionYear} Wolf480pl <wolf480@interia.pl>
+ * Copyright (c) 2014 Wolf480pl <wolf480@interia.pl>
  * java-lib-ircd is licensed under the GNU Lesser General Public License.
  *
  * java-lib-ircd is free software: you can redistribute it and/or modify

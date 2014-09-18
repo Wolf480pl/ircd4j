@@ -141,7 +141,7 @@
               <properties>
                 <name>${project.name}</name>
                 <url>${email}</url>
-                <year>${project.inceptionYear}</year>
+                <inceptionYear>${project.inceptionYear}</inceptionYear>
                 <organization>${author}</organization>
               </properties>
               <quiet>true</quiet>
