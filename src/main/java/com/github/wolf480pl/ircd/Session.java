@@ -21,7 +21,7 @@ package com.github.wolf480pl.ircd;
 
 public interface Session {
 
-	void send(Message msg);
+    void send(Message msg);
 
-	void disconnect();
+    void disconnect();
 }

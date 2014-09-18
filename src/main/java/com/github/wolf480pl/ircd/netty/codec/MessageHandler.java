@@ -32,37 +32,37 @@ import com.github.wolf480pl.ircd.SessionHandler;
 import com.github.wolf480pl.ircd.netty.NettySession;
 
 public class MessageHandler extends SimpleChannelInboundHandler<Message> {
-	public static final AttributeKey<Session> ATTR_SESSION = AttributeKey.valueOf(MessageHandler.class.getName() + ".SESSION");
-	public static final AttributeKey<SessionHandler> ATTR_SESSION_HANDLER = AttributeKey.valueOf(MessageHandler.class.getName() + ".SESSION_HANDLER");
+    public static final AttributeKey<Session> ATTR_SESSION = AttributeKey.valueOf(MessageHandler.class.getName() + ".SESSION");
+    public static final AttributeKey<SessionHandler> ATTR_SESSION_HANDLER = AttributeKey.valueOf(MessageHandler.class.getName() + ".SESSION_HANDLER");
 
-	private final AtomicReference<NettySession> session = new AtomicReference<>(null);
-	private final SessionHandler handler;
+    private final AtomicReference<NettySession> session = new AtomicReference<>(null);
+    private final SessionHandler handler;
 
-	public MessageHandler(SessionHandler handler) {
-		this.handler = handler;
-	}
+    public MessageHandler(SessionHandler handler) {
+        this.handler = handler;
+    }
 
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) {
-		final Channel ch = ctx.channel();
-		NettySession s = new NettySession(ch, handler);
-		if (!session.compareAndSet(null, s)) {
-			throw new IllegalStateException("Session was set before channel was activated");
-		}
-		ch.attr(ATTR_SESSION).set(s);
-		ch.attr(ATTR_SESSION_HANDLER).set(handler);
-	}
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        final Channel ch = ctx.channel();
+        NettySession s = new NettySession(ch, handler);
+        if (!session.compareAndSet(null, s)) {
+            throw new IllegalStateException("Session was set before channel was activated");
+        }
+        ch.attr(ATTR_SESSION).set(s);
+        ch.attr(ATTR_SESSION_HANDLER).set(handler);
+    }
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		handler.onInboundThrowable(session.get(), cause);
-	}
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        handler.onInboundThrowable(session.get(), cause);
+    }
 
-	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
-		NettySession s = session.get();
-		s.validate(ctx.channel());
-		handler.messageReceived(s, msg);
-	}
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
+        NettySession s = session.get();
+        s.validate(ctx.channel());
+        handler.messageReceived(s, msg);
+    }
 
 }

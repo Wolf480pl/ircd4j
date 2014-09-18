@@ -33,30 +33,30 @@ import com.github.wolf480pl.ircd.netty.codec.MessageEncoder;
 import com.github.wolf480pl.ircd.netty.codec.MessageHandler;
 
 public class IRCChannelInitializer extends ChannelInitializer<SocketChannel> {
-	public static final int MAX_LINE_LENGTH = 512;
-	public static final Charset CHARSET = Charset.forName("UTF-8");
+    public static final int MAX_LINE_LENGTH = 512;
+    public static final Charset CHARSET = Charset.forName("UTF-8");
 
-	private final SessionHandler handler;
+    private final SessionHandler handler;
 
-	public IRCChannelInitializer(SessionHandler handler) {
-		this.handler = handler;
-	}
+    public IRCChannelInitializer(SessionHandler handler) {
+        this.handler = handler;
+    }
 
-	@Override
-	protected void initChannel(SocketChannel ch) throws Exception {
-		LineBasedFrameDecoder lineDecoder = new LineBasedFrameDecoder(MAX_LINE_LENGTH);
-		StringDecoder stringDecoder = new StringDecoder(CHARSET); //FIXME: Should only split on CRLF, not on LF alone
-		MessageDecoder messageDecoder = new MessageDecoder();
-		MessageHandler messageHandler = new MessageHandler(handler);
+    @Override
+    protected void initChannel(SocketChannel ch) throws Exception {
+        LineBasedFrameDecoder lineDecoder = new LineBasedFrameDecoder(MAX_LINE_LENGTH);
+        StringDecoder stringDecoder = new StringDecoder(CHARSET); //FIXME: Should only split on CRLF, not on LF alone
+        MessageDecoder messageDecoder = new MessageDecoder();
+        MessageHandler messageHandler = new MessageHandler(handler);
 
-		StringEncoder stringEncoder = new StringEncoder(CHARSET);
-		MessageEncoder messageEncoder = new MessageEncoder();
+        StringEncoder stringEncoder = new StringEncoder(CHARSET);
+        MessageEncoder messageEncoder = new MessageEncoder();
 
-		// Inbound goes from first to last, outbound goes from last to first.
-		// i.e. the outside is on the left/top, the inside is on the right/bottom
-		ch.pipeline().addLast(lineDecoder).addLast(stringDecoder).addLast(messageDecoder).addLast(messageHandler)
-		.addLast(stringEncoder).addLast(messageEncoder);
+        // Inbound goes from first to last, outbound goes from last to first.
+        // i.e. the outside is on the left/top, the inside is on the right/bottom
+        ch.pipeline().addLast(lineDecoder).addLast(stringDecoder).addLast(messageDecoder).addLast(messageHandler)
+        .addLast(stringEncoder).addLast(messageEncoder);
 
-	}
+    }
 
 }

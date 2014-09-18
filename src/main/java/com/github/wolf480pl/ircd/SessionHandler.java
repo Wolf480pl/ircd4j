@@ -23,11 +23,11 @@ import org.apache.logging.log4j.Logger;
 
 public interface SessionHandler {
 
-	void messageReceived(Session session, Message msg);
+    void messageReceived(Session session, Message msg);
 
-	void onInboundThrowable(Session session, Throwable t);
+    void onInboundThrowable(Session session, Throwable t);
 
-	void onOutboundThrowable(Session session, Throwable t);
+    void onOutboundThrowable(Session session, Throwable t);
 
-	Logger getLogger(Session session);
+    Logger getLogger(Session session);
 }

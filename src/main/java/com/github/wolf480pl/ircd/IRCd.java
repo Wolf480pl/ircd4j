@@ -35,41 +35,41 @@ import org.apache.logging.log4j.Logger;
 import com.github.wolf480pl.ircd.netty.IRCChannelInitializer;
 
 public class IRCd {
-	private SocketAddress bindAddress;
-	private EventLoopGroup bossGroup = new NioEventLoopGroup();
-	private EventLoopGroup workerGroup = new NioEventLoopGroup();
-	private SessionHandler handler;
+    private SocketAddress bindAddress;
+    private EventLoopGroup bossGroup = new NioEventLoopGroup();
+    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private SessionHandler handler;
 
-	public IRCd(SocketAddress bindAddress, SessionHandler handler) {
-		this.bindAddress = bindAddress;
-		this.handler = handler;
-	}
+    public IRCd(SocketAddress bindAddress, SessionHandler handler) {
+        this.bindAddress = bindAddress;
+        this.handler = handler;
+    }
 
-	public ChannelFuture start() {
-		ServerBootstrap bootstrap = new ServerBootstrap();
-		bossGroup = new NioEventLoopGroup(1);
-		workerGroup = new NioEventLoopGroup();
+    public ChannelFuture start() {
+        ServerBootstrap bootstrap = new ServerBootstrap();
+        bossGroup = new NioEventLoopGroup(1);
+        workerGroup = new NioEventLoopGroup();
 
-		IRCChannelInitializer initializer = new IRCChannelInitializer(handler);
+        IRCChannelInitializer initializer = new IRCChannelInitializer(handler);
 
-		bootstrap
-				.group(bossGroup, workerGroup)
-				.channel(NioServerSocketChannel.class)
-				.childHandler(initializer)
-				.childOption(ChannelOption.TCP_NODELAY, true)
-				.childOption(ChannelOption.SO_KEEPALIVE, true);
+        bootstrap
+                .group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(initializer)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-		return bootstrap.bind(bindAddress);
-	}
+        return bootstrap.bind(bindAddress);
+    }
 
-	public static void main(String[] args) throws InterruptedException {
-	    Logger logger = LogManager.getLogger(IRCd.class);
-	    logger.info("Starting IRCd");
-		ChannelFuture f = new IRCd(new InetSocketAddress(6667), new IRCSessionHandler()).start();
-		f.sync(); // Wait for it to bind
-		logger.info("IRCd started");
-		
-		f.channel().closeFuture().sync(); // Wait for it to close
-	}
+    public static void main(String[] args) throws InterruptedException {
+        Logger logger = LogManager.getLogger(IRCd.class);
+        logger.info("Starting IRCd");
+        ChannelFuture f = new IRCd(new InetSocketAddress(6667), new IRCSessionHandler()).start();
+        f.sync(); // Wait for it to bind
+        logger.info("IRCd started");
+
+        f.channel().closeFuture().sync(); // Wait for it to close
+    }
 
 }
