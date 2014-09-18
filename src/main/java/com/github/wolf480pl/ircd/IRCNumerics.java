@@ -52,111 +52,165 @@ public class IRCNumerics {
         return new Message(prefix, String.valueOf(cmd), params);
     }
 
+    public static final int RPL_LUSERCLIENT = 251;
+
     public Message rplLuserClient(int users, int invisible, int servers) {
-        return numeric(251, "There are " + users + " users and " + invisible + " invisible on " + servers + " servers");
+        return numeric(RPL_LUSERCLIENT, "There are " + users + " users and " + invisible + " invisible on " + servers + " servers");
     }
+
+    public static final int RPL_LUSEROP = 252;
 
     public Message rplLuserOp(int ops) {
-        return numeric(252, String.valueOf(ops), "operator(s) online");
+        return numeric(RPL_LUSEROP, String.valueOf(ops), "operator(s) online");
     }
+
+    public static final int RPL_LUSERUNKNOWN = 253;
 
     public Message rplLuserUnknown(int unknown) {
-        return numeric(253, String.valueOf(unknown), "unknown connection(s)");
+        return numeric(RPL_LUSERUNKNOWN, String.valueOf(unknown), "unknown connection(s)");
     }
+
+    public static final int RPL_LUSERCHANNELS = 254;
 
     public Message rplLuserChannels(int channels) {
-        return numeric(254, String.valueOf(channels), "channels formed");
+        return numeric(RPL_LUSERCHANNELS, String.valueOf(channels), "channels formed");
     }
+
+    public static final int RPL_LUSERME = 251;
 
     public Message rplLuserMe(int clients, int servers) {
-        return numeric(251, "I have " + clients + " clients and " + servers + " servers");
+        return numeric(RPL_LUSERME, "I have " + clients + " clients and " + servers + " servers");
     }
+
+    public static final int ERR_NOSUCHNICK = 401;
 
     public Message errNoSuchNick(String nick) {
-        return numeric(401, nick, "No such nick/channel");
+        return numeric(ERR_NOSUCHNICK, nick, "No such nick/channel");
     }
+
+    public static final int ERR_NOSUCHSERVER = 402;
 
     public Message errNoSuchServer(String server) {
-        return numeric(402, server, "No such server");
+        return numeric(ERR_NOSUCHSERVER, server, "No such server");
     }
+
+    public static final int ERR_NOSUCHCHANNEL = 403;
 
     public Message errNoSuchChannel(String channel) {
-        return numeric(403, channel, "No such channel");
+        return numeric(ERR_NOSUCHCHANNEL, channel, "No such channel");
     }
+
+    public static final int ERR_CANNOTSENDTOCHAN = 404;
 
     public Message errCannotSendToChan(String channel) {
-        return numeric(404, channel, "Cannot send to channel");
+        return numeric(ERR_CANNOTSENDTOCHAN, channel, "Cannot send to channel");
     }
+
+    public static final int ERR_TOOMANYCHANNELS = 405;
 
     public Message errTooManyChannels(String channel) {
-        return numeric(405, channel, "You have joined too many channels");
+        return numeric(ERR_TOOMANYCHANNELS, channel, "You have joined too many channels");
     }
+
+    public static final int ERR_WASNUSUCHNICK = 406;
 
     public Message errWasNuSuchNick(String nick) {
-        return numeric(406, nick, "There was no such nickname");
+        return numeric(ERR_WASNUSUCHNICK, nick, "There was no such nickname");
     }
+
+    public static final int ERR_TOOMANYTARGETS = 407;
 
     public Message errTooManyTargets(String target) {
-        return numeric(407, target, "Duplicate recipients. No message delivered");
+        return numeric(ERR_TOOMANYTARGETS, target, "Duplicate recipients. No message delivered");
     }
+
+    public static final int ERR_NOORIGIN = 409;
 
     public Message errNoOrigin() {
-        return numeric(409, "No origin specified");
+        return numeric(ERR_NOORIGIN, "No origin specified");
     }
+
+    public static final int ERR_NORECIPIENT = 411;
 
     public Message errNoRecipient(String command) {
-        return numeric(411, "No recipient given (" + command + ")");
+        return numeric(ERR_NORECIPIENT, "No recipient given (" + command + ")");
     }
+
+    public static final int ERR_NOTEXTTOSEND = 412;
 
     public Message errNoTextToSend() {
-        return numeric(412, "No text to send");
+        return numeric(ERR_NOTEXTTOSEND, "No text to send");
     }
+
+    public static final int ERR_NOTOPLEVEL = 413;
 
     public Message errNoTopLevel(String mask) {
-        return numeric(413, mask, "No toplevel domain specified");
+        return numeric(ERR_NOTOPLEVEL, mask, "No toplevel domain specified");
     }
+
+    public static final int ERR_WILDTOPLEVEL = 414;
 
     public Message errWildTopLevel(String mask) {
-        return numeric(414, mask, "Wildcard in toplevel domain");
+        return numeric(ERR_WILDTOPLEVEL, mask, "Wildcard in toplevel domain");
     }
+
+    public static final int ERR_UNKNOWNCOMMAND = 421;
 
     public Message errUnknownCommand(String command) {
-        return numeric(421, command, "Unknown command");
+        return numeric(ERR_UNKNOWNCOMMAND, command, "Unknown command");
     }
+
+    public static final int ERR_NOMOTD = 422;
 
     public Message errNoMotd() {
-        return numeric(422, "MOTD File is missing");
+        return numeric(ERR_NOMOTD, "MOTD File is missing");
     }
+
+    public static final int ERR_NOADMININFO = 423;
 
     public Message errNoAdminInfo(String server) {
-        return numeric(423, server, "No administrative info available");
+        return numeric(ERR_NOADMININFO, server, "No administrative info available");
     }
+
+    public static final int ERR_FILEERROR = 424;
 
     public Message errFileError(String fileOp, String file) {
-        return numeric(424, "File error doing " + fileOp + " on " + file);
+        return numeric(ERR_FILEERROR, "File error doing " + fileOp + " on " + file);
     }
+
+    public static final int ERR_NONICKNAMEGIVEN = 431;
 
     public Message errNoNickNameGiven() {
-        return numeric(431, "No nickname given");
+        return numeric(ERR_NONICKNAMEGIVEN, "No nickname given");
     }
+
+    public static final int ERR_ERRORNEUSNICKNAME = 432;
 
     public Message errErrorneusNickname(String nick) {
-        return numeric(432, nick, "Erreneus nickname");
+        return numeric(ERR_ERRORNEUSNICKNAME, nick, "Erreneus nickname");
     }
+
+    public static final int ERR_NICKNAMEINUSE = 433;
 
     public Message errNicknameInUse(String nick) {
-        return numeric(433, nick, "Nickname is already in use");
+        return numeric(ERR_NICKNAMEINUSE, nick, "Nickname is already in use");
     }
+
+    public static final int ERR_NICKCOLLISION = 436;
 
     public Message errNickCollision(String nick) {
-        return numeric(436, nick, "Nickname collision KILL");
+        return numeric(ERR_NICKCOLLISION, nick, "Nickname collision KILL");
     }
+
+    public static final int ERR_NEEDMOREPARAMS = 461;
 
     public Message errNeedMoreParams(String command) {
-        return numeric(461, command, "Not enough parameters");
+        return numeric(ERR_NEEDMOREPARAMS, command, "Not enough parameters");
     }
 
+    public static final int ERR_ALREADYREGISTERED = 461;
+
     public Message errAlreadyRegistered() {
-        return numeric(461, "You may not reregister");
+        return numeric(ERR_ALREADYREGISTERED, "You may not reregister");
     }
 }
