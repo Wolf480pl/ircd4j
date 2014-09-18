@@ -93,9 +93,9 @@ public class IRCCommands {
     }
 
     public void motd(User user) {
-        user.numerics().rplMotdStart();
-        user.numerics().rplMotd(" === TODO === "); //TODO
-        user.numerics().rplEndOfMotd();
+        user.send(user.numerics().rplMotdStart());
+        user.send(user.numerics().rplMotd(" === TODO === ")); //TODO
+        user.send(user.numerics().rplEndOfMotd());
     }
 
     protected boolean verifyNick(String nick) {

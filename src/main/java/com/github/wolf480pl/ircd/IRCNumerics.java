@@ -97,7 +97,7 @@ public class IRCNumerics {
     public static final int RPL_ENDOFMOTD = 376;
 
     public Message rplEndOfMotd() {
-        return numeric(RPL_ENDOFMOTD, "End of /MOTD comman");
+        return numeric(RPL_ENDOFMOTD, "End of /MOTD command");
     }
 
     public static final int ERR_NOSUCHNICK = 401;
