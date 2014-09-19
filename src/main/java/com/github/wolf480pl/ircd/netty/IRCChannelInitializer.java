@@ -55,7 +55,7 @@ public class IRCChannelInitializer extends ChannelInitializer<SocketChannel> {
         // Inbound goes from first to last, outbound goes from last to first.
         // i.e. the outside is on the left/top, the inside is on the right/bottom
         ch.pipeline().addLast(lineDecoder).addLast(stringDecoder).addLast(messageDecoder).addLast(messageHandler)
-        .addLast(stringEncoder).addLast(messageEncoder);
+                .addLast(stringEncoder).addLast(messageEncoder);
 
     }
 

@@ -57,6 +57,7 @@ public class MessageDecoder extends MessageToMessageDecoder<String> {
             SessionHandler handler = ctx.channel().attr(MessageHandler.ATTR_SESSION_HANDLER).get();
             Session session = ctx.channel().attr(MessageHandler.ATTR_SESSION).get();
             handler.getLogger(session).debug("Received incorrect message:" + msg);
+            //TODO: Throw an exception, so that an upper layer can say "unknown command" ?
             return;
         }
 
