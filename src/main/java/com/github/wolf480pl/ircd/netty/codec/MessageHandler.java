@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
 
 import com.github.wolf480pl.ircd.Message;
@@ -60,9 +62,22 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
-        NettySession s = session.get();
+        final NettySession s = session.get();
         s.validate(ctx.channel());
         handler.messageReceived(s, msg);
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
+        if (event instanceof IdleStateEvent) {
+            final NettySession s = session.get();
+            s.validate(ctx.channel());
+            IdleStateEvent evt = (IdleStateEvent) event;
+            if (evt.state() != IdleState.WRITER_IDLE) {
+                // It's READER_IDLE or ALL_IDLE
+                handler.onInboundIdle(session.get());
+            }
+        }
     }
 
 }

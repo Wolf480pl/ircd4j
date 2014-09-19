@@ -91,5 +91,12 @@ public class IRCSessionHandler implements SessionHandler {
     public void putCommand(String name, Command cmd) {
         commandMap.put(name, cmd);
     }
+
+    @Override
+    public void onInboundIdle(Session session) {
+        logger.debug("User idle: " + getUser(session).getNick());
+        // TODO ping them, and if they don't respond for a long time - kill them
+
+    }
 }
 

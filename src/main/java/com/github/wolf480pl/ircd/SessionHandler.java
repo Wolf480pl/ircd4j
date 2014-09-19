@@ -29,5 +29,7 @@ public interface SessionHandler {
 
     void onOutboundThrowable(Session session, Throwable t);
 
+    void onInboundIdle(Session session);
+
     Logger getLogger(Session session);
 }

@@ -26,6 +26,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import com.github.wolf480pl.ircd.SessionHandler;
 import com.github.wolf480pl.ircd.netty.codec.MessageDecoder;
@@ -34,6 +35,7 @@ import com.github.wolf480pl.ircd.netty.codec.MessageHandler;
 
 public class IRCChannelInitializer extends ChannelInitializer<SocketChannel> {
     public static final int MAX_LINE_LENGTH = 512;
+    public static final int IDLE_TIMEOUT = 30;
     public static final Charset CHARSET = Charset.forName("UTF-8");
 
     private final SessionHandler handler;
@@ -52,9 +54,11 @@ public class IRCChannelInitializer extends ChannelInitializer<SocketChannel> {
         StringEncoder stringEncoder = new StringEncoder(CHARSET);
         MessageEncoder messageEncoder = new MessageEncoder();
 
+        IdleStateHandler idleHandler = new IdleStateHandler(IDLE_TIMEOUT, 0, 0);
+
         // Inbound goes from first to last, outbound goes from last to first.
         // i.e. the outside is on the left/top, the inside is on the right/bottom
-        ch.pipeline().addLast(lineDecoder).addLast(stringDecoder).addLast(messageDecoder).addLast(messageHandler)
+        ch.pipeline().addLast(lineDecoder).addLast(stringDecoder).addLast(messageDecoder).addLast(idleHandler).addLast(messageHandler)
                 .addLast(stringEncoder).addLast(messageEncoder);
 
     }
