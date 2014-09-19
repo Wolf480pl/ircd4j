@@ -19,19 +19,25 @@
  */
 package com.github.wolf480pl.ircd;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import com.github.wolf480pl.ircd.util.FunctionalMutableString;
 
 
 public class User {
     private final Session session;
-    private final IRCNumerics numerics;
+    private final ConcurrentMap<Class<? extends IRCNumerics>, IRCNumerics> numericsCache = new ConcurrentHashMap<>();
     private final String server;
+    private final FunctionalMutableString nickRef;
     private String nick;
 
     public User(Session session, String server) {
         this.session = session;
         this.server = server;
-        this.numerics = new IRCNumerics(server, new FunctionalMutableString(this::getNick));
+        this.nickRef = new FunctionalMutableString(this::getNick);
     }
 
     public String getNick() {
@@ -56,11 +62,37 @@ public class User {
     }
 
     public IRCNumerics numerics() {
+        return numerics(IRCNumerics.class);
+    }
+
+    public <T extends IRCNumerics> T numerics(Class<T> clazz) {
+        @SuppressWarnings("unchecked")
+        T numerics = (T) numericsCache.get(clazz);
+        if (numerics == null) {
+            try {
+                numerics = getNumerics(clazz, this);
+                numericsCache.putIfAbsent(clazz, numerics);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new IllegalArgumentException("Bad numerics class " + clazz.getSimpleName() + " - doesn't let us instantiate it", e);
+            }
+        }
         return numerics;
     }
 
     public String getServer() {
         //TODO: Is this right?
         return server;
+    }
+
+    private static final ConcurrentMap<Class<? extends IRCNumerics>, Constructor<? extends IRCNumerics>> constructorCache = new ConcurrentHashMap<>();
+
+    protected static <T extends IRCNumerics> T getNumerics(Class<T> clazz, User user) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        @SuppressWarnings("unchecked")
+        Constructor<T> constructor = (Constructor<T>) constructorCache.get(clazz);
+        if (constructor == null) {
+            constructor = clazz.getDeclaredConstructor(String.class, CharSequence.class);
+            constructorCache.putIfAbsent(clazz, constructor);
+        }
+        return constructor.newInstance(user.server, user.nickRef);
     }
 }
