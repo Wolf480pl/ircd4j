@@ -26,6 +26,7 @@ import io.netty.channel.ChannelFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.wolf480pl.ircd.impl.IRCSessionHandler;
 import com.github.wolf480pl.ircd.netty.NettyServer;
 
 public class IRCd {

@@ -26,7 +26,7 @@ public class IRCCommands {
     public IRCCommands() {
     }
 
-    public void register(IRCSessionHandler handler) {
+    public void register(CommandRegistry handler) {
         handler.putCommand("NICK", this::nick);
         handler.putCommand("USER", this::user);
         handler.putCommand("QUIT", this::quit);

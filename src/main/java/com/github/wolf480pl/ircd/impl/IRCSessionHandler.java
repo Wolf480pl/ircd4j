@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.wolf480pl.ircd;
+package com.github.wolf480pl.ircd.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,15 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class IRCSessionHandler implements SessionHandler {
+import com.github.wolf480pl.ircd.Command;
+import com.github.wolf480pl.ircd.CommandRegistry;
+import com.github.wolf480pl.ircd.IRCCommands;
+import com.github.wolf480pl.ircd.Message;
+import com.github.wolf480pl.ircd.Session;
+import com.github.wolf480pl.ircd.SessionHandler;
+import com.github.wolf480pl.ircd.User;
+
+public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private static final Logger logger = LogManager.getLogger(IRCSessionHandler.class);
 
     private final Map<String, Command> commandMap = new HashMap<>();
@@ -88,6 +96,7 @@ public class IRCSessionHandler implements SessionHandler {
         return user == null ? newUser : user;
     }
 
+    @Override
     public void putCommand(String name, Command cmd) {
         commandMap.put(name, cmd);
     }
