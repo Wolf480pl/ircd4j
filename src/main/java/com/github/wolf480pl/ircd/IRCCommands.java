@@ -30,6 +30,8 @@ public class IRCCommands {
         handler.putCommand("NICK", this::nick);
         handler.putCommand("USER", this::user);
         handler.putCommand("QUIT", this::quit);
+        handler.putCommand("PONG", (user, args)->{});
+        handler.putCommand("PING", this::ping);
     }
 
     public void nick(User user, List<String> args) {
@@ -74,6 +76,28 @@ public class IRCCommands {
         quit(user, reason);
     }
 
+    public void ping(User user, List<String> args) {
+        if (args.size() < 1) {
+            user.send(user.numerics().errNeedMoreParams("PING"));
+            return;
+        }
+        final String origin = args.get(0);
+        final String we = user.getServer();
+        String target;
+        if (args.size() >= 2) {
+            target = args.get(1);
+            if (!target.equalsIgnoreCase(we)) {
+                //TODO: Support other servers
+                user.send(user.numerics().errNoSuchServer(target));
+                return;
+            }
+        } else {
+            target = we;
+        }
+        user.send(Message.withPrefix(we, "PONG", target, origin));
+
+    }
+
     public void quit(User user, String reason) {
         //TODO: broadcast this
         user.send(Message.withPrefix(user.getServer(), "QUIT", reason));
@@ -96,6 +120,11 @@ public class IRCCommands {
         user.send(user.numerics().rplMotdStart());
         user.send(user.numerics().rplMotd(" === TODO === ")); //TODO
         user.send(user.numerics().rplEndOfMotd());
+    }
+
+    public void ping(User user) {
+        final String server = user.getServer();
+        user.send(Message.withoutPrefix("PING", server));
     }
 
     protected boolean verifyNick(String nick) {

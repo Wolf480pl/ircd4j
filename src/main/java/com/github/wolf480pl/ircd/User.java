@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.wolf480pl.ircd.util.FunctionalMutableString;
 
@@ -32,6 +33,7 @@ public class User {
     private final ConcurrentMap<Class<? extends IRCNumerics>, IRCNumerics> numericsCache = new ConcurrentHashMap<>();
     private final String server;
     private final FunctionalMutableString nickRef;
+    private final AtomicBoolean pingSent = new AtomicBoolean(false);
     private String nick;
 
     public User(Session session, String server) {
@@ -82,6 +84,18 @@ public class User {
     public String getServer() {
         //TODO: Is this right?
         return server;
+    }
+
+    public boolean isPingSent() {
+        return pingSent.get();
+    }
+
+    public boolean setPingSent() {
+        return pingSent.compareAndSet(false, true);
+    }
+
+    public void clearPingSent() {
+        pingSent.set(false);
     }
 
     private static final ConcurrentMap<Class<? extends IRCNumerics>, Constructor<? extends IRCNumerics>> constructorCache = new ConcurrentHashMap<>();

@@ -41,9 +41,11 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private final Map<String, Command> commandMap = new HashMap<>();
     private final ConcurrentMap<Session, User> userMap = new ConcurrentHashMap<>();
     private final String serverName = "localhost";
+    private final IRCCommands ircCmds;
 
     public IRCSessionHandler() {
-        new IRCCommands().register(this);
+        this.ircCmds = new IRCCommands();
+        ircCmds.register(this);
         // TODO Auto-generated constructor stub
     }
 
@@ -53,6 +55,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
 
         User user = getUser(session);
 
+        user.clearPingSent();
         final String prefix = msg.getPrefix();
         if (prefix != null && !prefix.equalsIgnoreCase(user.getNick())) {
             logger.debug("Ignoring message with wrong prefix: " + prefix);
@@ -103,8 +106,13 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
 
     @Override
     public void onInboundIdle(Session session) {
-        logger.debug("User idle: " + getUser(session).getNick());
-        // TODO ping them, and if they don't respond for a long time - kill them
+        User user = getUser(session);
+        logger.debug("User idle: " + user.getNick());
+        if (user.setPingSent()) {
+            ircCmds.ping(user);
+        } else {
+            ircCmds.quit(user, "Ping timeout");
+        }
 
     }
 }
