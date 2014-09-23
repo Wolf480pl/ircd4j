@@ -48,6 +48,7 @@ public class IRCCommands {
         //TODO: check for collisions, maintain a nick->user map
 
         if (user.getNick() != null) {
+            //TODO: broadcast this
             user.send(Message.withPrefix(user.getHostmask(), "NICK", nick));
         }
         user.setNick(nick);
@@ -104,7 +105,7 @@ public class IRCCommands {
 
     public void quit(User user, String reason) {
         //TODO: broadcast this
-        user.send(Message.withPrefix(user.getServer(), "QUIT", reason));
+        user.send(Message.withPrefix(user.getHostmask(), "QUIT", reason));
         user.getSession().disconnect();
     }
 
