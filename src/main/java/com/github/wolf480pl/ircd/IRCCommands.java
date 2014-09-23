@@ -58,6 +58,10 @@ public class IRCCommands {
             user.send(user.numerics().errNeedMoreParams("USER"));
             return;
         }
+        String username = args.get(0);
+        String realname = args.get(3);
+        user.setUsername(username);
+        user.setRealName(realname);
 
         if (false /*TODO*/) {
             user.send(user.numerics().errAlreadyRegistered());

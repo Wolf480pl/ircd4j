@@ -21,6 +21,7 @@ package com.github.wolf480pl.ircd;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,6 +36,9 @@ public class User {
     private final FunctionalMutableString nickRef;
     private final AtomicBoolean pingSent = new AtomicBoolean(false);
     private String nick;
+    private String username;
+    private String hostname;
+    private String realName;
 
     public User(Session session, String server) {
         this.session = session;
@@ -50,6 +54,26 @@ public class User {
         this.nick = nick;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
     public Session getSession() {
         return session;
     }
@@ -59,8 +83,8 @@ public class User {
     }
 
     public String getHostmask() {
-        //TODO
-        return nick;
+        //TODO: Ident
+        return nick + "!~" + username + "@" + hostname;
     }
 
     public IRCNumerics numerics() {
@@ -96,6 +120,15 @@ public class User {
 
     public void clearPingSent() {
         pingSent.set(false);
+    }
+
+    // non-API
+    public void resolveHostName() {
+        if (hostname != null) {
+            return;
+        }
+        //TODO: do asynchronous DNS lookup
+        this.hostname = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getCanonicalHostName();
     }
 
     private static final ConcurrentMap<Class<? extends IRCNumerics>, Constructor<? extends IRCNumerics>> constructorCache = new ConcurrentHashMap<>();

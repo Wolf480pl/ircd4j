@@ -54,6 +54,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
         logger.debug(msg);
 
         User user = getUser(session);
+        user.resolveHostName();
 
         user.clearPingSent();
         final String prefix = msg.getPrefix();

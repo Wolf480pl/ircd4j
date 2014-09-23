@@ -19,9 +19,13 @@
  */
 package com.github.wolf480pl.ircd;
 
+import java.net.SocketAddress;
+
 public interface Session {
 
     void send(Message msg);
 
     void disconnect();
+
+    SocketAddress getRemoteAddress();
 }

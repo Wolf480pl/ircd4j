@@ -44,6 +44,8 @@
  */
 package com.github.wolf480pl.ircd.netty;
 
+import java.net.SocketAddress;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.Future;
@@ -91,5 +93,10 @@ public class NettySession implements Session {
         if (this.channel != ch) {
             throw new IllegalStateException("Not our channel!");
         }
+    }
+
+    @Override
+    public SocketAddress getRemoteAddress() {
+        return channel.remoteAddress();
     }
 }
