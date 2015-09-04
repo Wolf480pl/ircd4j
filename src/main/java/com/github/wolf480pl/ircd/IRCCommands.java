@@ -47,11 +47,18 @@ public class IRCCommands {
 
         //TODO: check for collisions, maintain a nick->user map
 
+        // FIXME: thread safety
         if (user.getNick() != null) {
             //TODO: broadcast this
             user.send(Message.withPrefix(user.getHostmask(), "NICK", nick));
         }
         user.setNick(nick);
+
+        if (user.setNickReceived() && user.isUserReceived()) {
+            if (user.setRegisterd()) {
+                registerUser(user);
+            }
+        }
     }
 
     public void user(User user, List<String> args) {
@@ -64,9 +71,18 @@ public class IRCCommands {
         user.setUsername(username);
         user.setRealName(realname);
 
-        if (false /*TODO*/) {
+        if (user.isRegistered()) {
             user.send(user.numerics().errAlreadyRegistered());
         }
+
+        if (user.setUserReceived() && user.isNickReceived()) {
+            if (user.setRegisterd()) {
+                registerUser(user);
+            }
+        }
+    }
+
+    protected void registerUser(User user) {
         luser(user);
         motd(user);
     }
