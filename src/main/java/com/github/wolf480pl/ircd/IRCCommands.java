@@ -47,8 +47,10 @@ public class IRCCommands {
 
         //TODO: check for collisions, maintain a nick->user map
 
-        // FIXME: thread safety
-        if (user.getNick() != null) {
+        // FIXME: thread safety (2 NICK commands in parallel, first one calls setRegistered after the second one called isRegistered,
+        //                       which said she wasn't, but before it calls setNick, so that the user gets registered with old nick
+        //                       and then her nick is set to the new value, without a proper rename action being triggered)
+        if (user.isRegistered()) {
             //TODO: broadcast this
             user.send(Message.withPrefix(user.getHostmask(), "NICK", nick));
         }
