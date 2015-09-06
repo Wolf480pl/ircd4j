@@ -21,6 +21,8 @@ package com.github.wolf480pl.ircd;
 
 import java.net.SocketAddress;
 
+import org.apache.logging.log4j.Logger;
+
 public interface Session {
 
     void send(Message msg);
@@ -28,4 +30,6 @@ public interface Session {
     void disconnect();
 
     SocketAddress getRemoteAddress();
+
+    Logger getLogger();
 }

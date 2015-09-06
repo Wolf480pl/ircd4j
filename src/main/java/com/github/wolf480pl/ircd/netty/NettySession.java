@@ -51,6 +51,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.wolf480pl.ircd.Message;
 import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
@@ -70,6 +72,7 @@ public class NettySession implements Session {
     }
 
     public ChannelFuture sendWithFuture(Message msg) {
+        getLogger().debug("" + getRemoteAddress() + " <- " + msg);
         if (!channel.isActive()) {
             throw new IllegalStateException("Trying to send a message when a session is inactive!");
         }
@@ -98,5 +101,10 @@ public class NettySession implements Session {
     @Override
     public SocketAddress getRemoteAddress() {
         return channel.remoteAddress();
+    }
+
+    @Override
+    public Logger getLogger() {
+        return handler.getLogger(this);
     }
 }

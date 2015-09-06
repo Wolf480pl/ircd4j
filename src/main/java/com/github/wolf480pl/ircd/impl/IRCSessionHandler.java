@@ -51,7 +51,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
 
     @Override
     public void messageReceived(Session session, Message msg) {
-        logger.debug(msg);
+        logger.debug("" + session.getRemoteAddress() + " -> " + msg);
 
         User user = getUser(session);
         user.resolveHostName();
