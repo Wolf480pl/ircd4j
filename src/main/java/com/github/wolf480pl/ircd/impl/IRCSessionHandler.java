@@ -63,7 +63,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
             return;
         }
 
-        String command = msg.getCommand();
+        String command = msg.getCommand().toUpperCase();
         Command cmd = commandMap.get(command);
         if (cmd == null) {
             logger.debug("Unknown command: " + command);
