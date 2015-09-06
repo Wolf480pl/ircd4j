@@ -122,9 +122,18 @@ public class IRCCommands {
     }
 
     public void quit(User user, String reason) {
-        //TODO: broadcast this
+        if (!user.setQuitted()) {
+            // Quit already broadcasted
+            return;
+        }
         user.send(Message.withPrefix(user.getHostmask(), "QUIT", reason));
         user.getSession().disconnect();
+        onQuit(user, reason);
+    }
+
+    public void onQuit(User user, String reason) {
+        // TODO: broadcast this
+        user.getSession().getLogger().debug("B " + Message.withPrefix(user.getHostmask(), "QUIT", reason));
     }
 
     public void luser(User user) {

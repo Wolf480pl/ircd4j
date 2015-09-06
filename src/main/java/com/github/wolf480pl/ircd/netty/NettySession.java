@@ -89,7 +89,7 @@ public class NettySession implements Session {
 
     @Override
     public void disconnect() {
-        channel.close();
+        channel.disconnect();
     };
 
     public void validate(Channel ch) {

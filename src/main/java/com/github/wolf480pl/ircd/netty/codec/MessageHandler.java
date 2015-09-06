@@ -56,6 +56,11 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+        handler.onDisconnect(session.get());
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         handler.onInboundThrowable(session.get(), cause);
     }

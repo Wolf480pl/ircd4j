@@ -116,5 +116,14 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
         }
 
     }
+
+    @Override
+    public void onDisconnect(Session session) {
+        final User user = getUser(session);
+        if (user.setQuitted()) {
+            ircCmds.onQuit(user, "Connection closed by peer");
+        }
+        userMap.remove(session);
+    }
 }
 

@@ -38,6 +38,7 @@ public class User {
     private final AtomicBoolean gotNick = new AtomicBoolean(false);
     private final AtomicBoolean gotUser = new AtomicBoolean(false);
     private final AtomicBoolean isRegistered = new AtomicBoolean(false);
+    private final AtomicBoolean quitted = new AtomicBoolean(false);
     private String nick;
     private String username;
     private String hostname;
@@ -147,6 +148,14 @@ public class User {
 
     public boolean setRegisterd() {
         return isRegistered.compareAndSet(false, true);
+    }
+
+    public boolean isQuitted() {
+        return quitted.get();
+    }
+
+    public boolean setQuitted() {
+        return quitted.compareAndSet(false, true);
     }
 
     // non-API

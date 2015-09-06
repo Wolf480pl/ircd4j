@@ -31,5 +31,7 @@ public interface SessionHandler {
 
     void onInboundIdle(Session session);
 
+    void onDisconnect(Session session);
+
     Logger getLogger(Session session);
 }
