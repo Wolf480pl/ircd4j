@@ -85,6 +85,7 @@ public class IRCCommands {
     }
 
     protected void registerUser(User user) {
+        user.send(user.numerics().rplWelcome("TODO"));
         luser(user);
         motd(user);
     }

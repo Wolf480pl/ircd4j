@@ -49,7 +49,13 @@ public class IRCNumerics {
         String targetName = target.toString();
         params.add(targetName == null ? "*" : targetName);
         params.addAll(Arrays.asList(args));
-        return new Message(prefix, String.valueOf(cmd), params);
+        return new Message(prefix, String.format("%03d", cmd), params);
+    }
+
+    public static final int RPL_WELCOME = 001;
+
+    public Message rplWelcome(String networkName) {
+        return numeric(RPL_WELCOME, "Welcome to the " + networkName + " Internet Relay Chat Network " + target);
     }
 
     public static final int RPL_LUSERCLIENT = 251;
