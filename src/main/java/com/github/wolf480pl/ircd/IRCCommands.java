@@ -20,6 +20,10 @@
 package com.github.wolf480pl.ircd;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import com.github.wolf480pl.ircd.util.AttributeKey;
 
 public class IRCCommands {
 
@@ -34,6 +38,8 @@ public class IRCCommands {
         handler.putCommand("PING", this::ping);
     }
 
+    private static final AttributeKey<AtomicReference<RegistrationData>> ATTR_REGDATA = AttributeKey.valueOf(RegistrationData.class.getCanonicalName());
+
     public void nick(User user, List<String> args) {
         if (args.size() < 1) {
             user.send(user.numerics().errNoNickNameGiven());
@@ -47,19 +53,27 @@ public class IRCCommands {
 
         //TODO: check for collisions, maintain a nick->user map
 
-        // FIXME: thread safety (2 NICK commands in parallel, first one calls setRegistered after the second one called isRegistered,
-        //                       which said she wasn't, but before it calls setNick, so that the user gets registered with old nick
-        //                       and then her nick is set to the new value, without a proper rename action being triggered)
         if (user.isRegistered()) {
             //TODO: broadcast this
             user.send(Message.withPrefix(user.getHostmask(), "NICK", nick));
-        }
-        user.setNick(nick);
+            user.setNick(nick);
+        } else {
+            RegistrationData regdata = user.attr(ATTR_REGDATA, makeRegdata).get();
+            if (regdata != null) {
 
-        if (user.setNickReceived() && user.isUserReceived()) {
-            if (user.setRegisterd()) {
-                registerUser(user);
+                String old = regdata.nick.getAndUpdate((s) -> (s == RegistrationData.INPROGGRESS_NICK) ? s : nick);
+
+                if (old != RegistrationData.INPROGGRESS_NICK) {
+                    regdata.gotNick = true;
+
+                    if (old == null && regdata.gotUser) {
+                        registerUser(user);
+                    }
+                    return;
+                }
             }
+            user.send(user.numerics().rplTryAgain("NICK"));
+            return;
         }
     }
 
@@ -70,22 +84,43 @@ public class IRCCommands {
         }
         String username = args.get(0);
         String realname = args.get(3);
-        user.setUsername(username);
-        user.setRealName(realname);
 
         if (user.isRegistered()) {
             user.send(user.numerics().errAlreadyRegistered());
-        }
+        } else {
+            RegistrationData regdata = user.attr(ATTR_REGDATA, makeRegdata).get();
+            if (regdata != null) {
+                String[] userAndRealName = new String[] { username, realname };
 
-        if (user.setUserReceived() && user.isNickReceived()) {
-            if (user.setRegisterd()) {
-                registerUser(user);
+                String[] old = regdata.userAndRealName.getAndUpdate((s) -> (s == RegistrationData.INPROGGRESS_USER) ? s : userAndRealName);
+
+                if (old != RegistrationData.INPROGGRESS_USER) {
+                    regdata.gotUser = true;
+
+                    if (old == null && regdata.gotNick) {
+                        registerUser(user);
+                    }
+                    return;
+                }
             }
+            user.send(user.numerics().rplTryAgain("USER"));
+            return;
         }
     }
 
     protected void registerUser(User user) {
+        RegistrationData regdata = user.attr(ATTR_REGDATA).getAndSet(null);
+        if (regdata == null) {
+            // Already registered
+            return;
+        }
+        String nick = regdata.nick.getAndSet(RegistrationData.INPROGGRESS_NICK);
+        user.setNick(nick);
+        String[] userAndRealName = regdata.userAndRealName.getAndSet(RegistrationData.INPROGGRESS_USER);
+        user.setUsername(userAndRealName[0]);
+        user.setRealName(userAndRealName[1]);
         user.send(user.numerics().rplWelcome("TODO"));
+        user.setRegisterd();
         luser(user);
         motd(user);
     }
@@ -164,5 +199,20 @@ public class IRCCommands {
         //TODO
         return true;
     }
+
+    private static class RegistrationData {
+        public static final String INPROGGRESS_NICK = new String("--IN-PROGGRESS--"); // An illegal nick
+        public static final String[] INPROGGRESS_USER = new String[0];
+        public final AtomicReference<String> nick = new AtomicReference<>();
+        public final AtomicReference<String[]> userAndRealName = new AtomicReference<>();
+        public volatile boolean gotNick = false;
+        public volatile boolean gotUser = false;
+    }
+
+    private static AtomicReference<RegistrationData> makeRegdata() {
+        return new AtomicReference<>(new RegistrationData());
+    }
+
+    private static final Supplier<AtomicReference<RegistrationData>> makeRegdata = IRCCommands::makeRegdata;
 
 }

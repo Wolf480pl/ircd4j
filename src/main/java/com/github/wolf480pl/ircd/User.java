@@ -37,8 +37,6 @@ public class User {
     private final String server;
     private final FunctionalMutableString nickRef;
     private final AtomicBoolean pingSent = new AtomicBoolean(false);
-    private final AtomicBoolean gotNick = new AtomicBoolean(false);
-    private final AtomicBoolean gotUser = new AtomicBoolean(false);
     private final AtomicBoolean isRegistered = new AtomicBoolean(false);
     private final AtomicBoolean quitted = new AtomicBoolean(false);
     private String nick;
@@ -128,22 +126,6 @@ public class User {
 
     public void clearPingSent() {
         pingSent.set(false);
-    }
-
-    public boolean isUserReceived() {
-        return gotUser.get();
-    }
-
-    public boolean setUserReceived() {
-        return gotUser.compareAndSet(false, true);
-    }
-
-    public boolean isNickReceived() {
-        return gotNick.get();
-    }
-
-    public boolean setNickReceived() {
-        return gotNick.compareAndSet(false, true);
     }
 
     public boolean isRegistered() {
