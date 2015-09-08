@@ -25,7 +25,9 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
+import com.github.wolf480pl.ircd.util.AttributeKey;
 import com.github.wolf480pl.ircd.util.FunctionalMutableString;
 
 
@@ -43,6 +45,8 @@ public class User {
     private String username;
     private String hostname;
     private String realName;
+
+    private final ConcurrentMap<AttributeKey<?>, Object> attrs = new ConcurrentHashMap<>();
 
     public User(Session session, String server) {
         this.session = session;
@@ -156,6 +160,21 @@ public class User {
 
     public boolean setQuitted() {
         return quitted.compareAndSet(false, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T attr(AttributeKey<T> key) {
+        return (T) attrs.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T attr(AttributeKey<T> key, T putIfAbsent) {
+        return (T) attrs.putIfAbsent(key, putIfAbsent);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T attr(AttributeKey<T> key, Supplier<T> factory) {
+        return (T) attrs.computeIfAbsent(key, (x) -> factory.get());
     }
 
     // non-API
