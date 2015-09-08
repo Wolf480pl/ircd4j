@@ -88,6 +88,12 @@ public class IRCNumerics {
         return numeric(RPL_LUSERME, "I have " + clients + " clients and " + servers + " servers");
     }
 
+    public static final int RPL_TRYAGAIN = 263;
+
+    public Message rplTryAgain(String command) {
+        return numeric(RPL_TRYAGAIN, command, "Command dropped. Please try again later.");
+    }
+
     public static final int RPL_MOTDSTART = 375;
 
     public Message rplMotdStart() {
