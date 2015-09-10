@@ -46,9 +46,9 @@ public class MessageEncoder extends MessageToMessageEncoder<Message> {
                 //TODO: Should this happen at all?
                 continue;
             }
-            if (param.contains(" ")) {
+            if (param.contains(" ") || param.isEmpty()) {
                 if (it.hasNext()) {
-                    throw new IllegalArgumentException("IRC command parameter \"" + param + "\" contains space and isn't the last parameter");
+                    throw new IllegalArgumentException("IRC command parameter \"" + param + "\" contains space (or is empty) and isn't the last parameter");
                 } else {
                     builder.append(" :").append(param);
                 }
