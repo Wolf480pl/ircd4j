@@ -39,6 +39,10 @@ public class MessageDecoder extends MessageToMessageDecoder<String> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
+        if (msg.isEmpty()) {
+            // Silently ignore empty messages, per RFC 1459 2.3.1
+            return;
+        }
         Matcher matcher = IRCRegexes.REGEX_PATTERN_MESSAGE.matcher(msg);
         if (!matcher.matches()) {
             SessionHandler handler = ctx.channel().attr(MessageHandler.ATTR_SESSION_HANDLER).get();
