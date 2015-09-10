@@ -22,6 +22,7 @@ package com.github.wolf480pl.ircd;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
 
 public class Message {
     private String prefix;
@@ -81,5 +82,56 @@ public class Message {
 
     public static Message withoutPrefix(String command, String... params) {
         return new Message(command, Arrays.asList(params));
+    }
+
+    public static class Prefix {
+        private String nick;
+        private String username;
+        private String host;
+
+        public Prefix(String nick, String username, String host) {
+            this.nick = nick;
+            this.username = username;
+            this.host = host;
+        }
+
+        public String nick() {
+            return nick;
+        }
+
+        public String username() {
+            return username;
+        }
+
+        public String host() {
+            return host;
+        }
+
+        @Override
+        public String toString() {
+            if (nick == null) {
+                return host;
+            }
+            StringBuilder sb = new StringBuilder(nick);
+            if (username != null) {
+                sb.append('!').append(username);
+            }
+            if (host != null) {
+                sb.append('@').append(host);
+            }
+            return sb.toString();
+        }
+
+        public static Prefix parse(String prefix) {
+            Matcher m = IRCRegexes.REGEX_PREFIX.matcher(prefix);
+            if (!m.matches()) {
+                return null;
+            }
+            return new Prefix(m.group("nick"), m.group("user"), m.group("host"));
+        }
+
+        public static Prefix ofServer(String hostname) {
+            return new Prefix(null, null, hostname);
+        }
     }
 }

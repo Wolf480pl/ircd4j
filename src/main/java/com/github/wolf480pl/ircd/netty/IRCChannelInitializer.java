@@ -32,6 +32,8 @@ import com.github.wolf480pl.ircd.SessionHandler;
 import com.github.wolf480pl.ircd.netty.codec.MessageDecoder;
 import com.github.wolf480pl.ircd.netty.codec.MessageEncoder;
 import com.github.wolf480pl.ircd.netty.codec.MessageHandler;
+import com.github.wolf480pl.ircd.netty.codec.NickTracker;
+import com.github.wolf480pl.ircd.netty.codec.NickFiller;
 
 public class IRCChannelInitializer extends ChannelInitializer<SocketChannel> {
     public static final int MAX_LINE_LENGTH = 512;
@@ -53,13 +55,15 @@ public class IRCChannelInitializer extends ChannelInitializer<SocketChannel> {
 
         StringEncoder stringEncoder = new StringEncoder(CHARSET);
         MessageEncoder messageEncoder = new MessageEncoder();
+        NickTracker nickTracker = new NickTracker();
+        NickFiller nickFiller = new NickFiller();
 
         IdleStateHandler idleHandler = new IdleStateHandler(IDLE_TIMEOUT, 0, 0);
 
         // Inbound goes from first to last, outbound goes from last to first.
         // i.e. the outside is on the left/top, the inside is on the right/bottom
         ch.pipeline().addLast(lineDecoder).addLast(stringDecoder).addLast(messageDecoder).addLast(idleHandler).addLast(messageHandler)
-                .addLast(stringEncoder).addLast(messageEncoder);
+                .addLast(stringEncoder).addLast(messageEncoder).addLast(nickTracker).addLast(nickFiller);
 
     }
 

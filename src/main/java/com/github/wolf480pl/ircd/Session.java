@@ -27,6 +27,8 @@ public interface Session {
 
     void send(Message msg);
 
+    void sendLazy(LazyNickedMessage msg);
+
     void disconnect();
 
     SocketAddress getRemoteAddress();

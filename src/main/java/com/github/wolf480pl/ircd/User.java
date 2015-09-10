@@ -88,6 +88,10 @@ public class User {
         session.send(msg);
     }
 
+    public void send(LazyNickedMessage msg) {
+        session.sendLazy(msg);
+    }
+
     public String getHostmask() {
         //TODO: Ident
         return nick + "!~" + username + "@" + hostname;

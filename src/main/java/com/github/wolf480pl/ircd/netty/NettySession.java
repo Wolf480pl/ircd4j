@@ -53,6 +53,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 
 import org.apache.logging.log4j.Logger;
 
+import com.github.wolf480pl.ircd.LazyNickedMessage;
 import com.github.wolf480pl.ircd.Message;
 import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
@@ -71,10 +72,16 @@ public class NettySession implements Session {
         sendWithFuture(msg);
     }
 
-    public ChannelFuture sendWithFuture(Message msg) {
+    @Override
+    public void sendLazy(LazyNickedMessage msg) {
+        sendWithFuture(msg);
+    }
+
+    protected ChannelFuture sendWithFuture(Object msg) {
         getLogger().debug("" + getRemoteAddress() + " <- " + msg);
         if (!channel.isActive()) {
             throw new IllegalStateException("Trying to send a message when a session is inactive!");
+            //return channel.newFailedFuture(new IllegalStateException("Trying to send a message when a session is inactive!"));
         }
         return channel.writeAndFlush(msg).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override

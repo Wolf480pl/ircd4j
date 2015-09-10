@@ -67,7 +67,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
         Command cmd = commandMap.get(command);
         if (cmd == null) {
             logger.debug("Unknown command: " + command);
-            session.send(user.numerics().errUnknownCommand(command));
+            session.sendLazy(user.numerics().errUnknownCommand(command));
             return;
         }
 
