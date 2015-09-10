@@ -49,6 +49,7 @@ public class IRCCommands {
         String nick = args.get(0);
         if (!verifyNick(nick)) {
             user.send(user.numerics().errErrorneusNickname(nick));
+            return;
         }
 
         //TODO: check for collisions, maintain a nick->user map
