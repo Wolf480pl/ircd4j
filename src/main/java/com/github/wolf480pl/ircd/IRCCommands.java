@@ -71,7 +71,14 @@ public class IRCCommands {
         if (user.isRegistered()) {
             String newNick;
             if (registry != null) {
-                newNick = registry.changeNick(user, nick);
+                try {
+                    newNick = registry.changeNick(user, nick);
+                } catch (DropMessageException e) {
+                    if (!e.silently()) {
+                        user.send(user.numerics().rplTryAgain("NICK", e));
+                    }
+                    return;
+                }
                 if (newNick == null) {
                     user.send(user.numerics().errNicknameInUse(nick));
                     return;
@@ -124,7 +131,13 @@ public class IRCCommands {
             return;
         }
         if (registry != null) {
-            if (!registry.register(user)) {
+            try {
+                registry.register(user);
+            } catch (DropMessageException e) {
+                if (!e.silently()) {
+                    // TODO: Should we differentiate between NICK and USER ?
+                    user.send(user.numerics().rplTryAgain("NICK", e));
+                }
                 return;
             }
         }

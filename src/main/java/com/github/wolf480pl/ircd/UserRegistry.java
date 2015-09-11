@@ -23,9 +23,9 @@ public interface UserRegistry {
 
     User getUser(String nick);
 
-    boolean register(User user);
+    void register(User user) throws DropMessageException;
 
-    String changeNick(User user, String newNick);
+    String changeNick(User user, String newNick) throws DropMessageException;
 
-    void unregister(User user);
+    void unregister(User user) throws DropMessageException;
 }

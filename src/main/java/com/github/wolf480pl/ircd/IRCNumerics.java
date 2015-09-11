@@ -90,8 +90,23 @@ public class IRCNumerics {
 
     public static final int RPL_TRYAGAIN = 263;
 
+    public Message rplTryAgain(String command, DropMessageException e) {
+        if (e.silently()) {
+            return null;
+        }
+        String message = e.getMessage();
+        if (message != null) {
+            return rplTryAgain(command, message);
+        }
+        return rplTryAgain(command);
+    }
+
     public Message rplTryAgain(String command) {
-        return numeric(RPL_TRYAGAIN, command, "Command dropped. Please try again later.");
+        return rplTryAgain(command, "Please try again later.");
+    }
+
+    public Message rplTryAgain(String command, String reason) {
+        return numeric(RPL_TRYAGAIN, command, "Command dropped. " + reason);
     }
 
     public static final int RPL_MOTDSTART = 375;
