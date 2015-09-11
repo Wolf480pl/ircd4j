@@ -88,6 +88,12 @@ public class User {
         session.send(msg);
     }
 
+    public void maybeSend(Message msgOrNull) {
+        if (msgOrNull != null) {
+            send(msgOrNull);
+        }
+    }
+
     public String getHostmask() {
         //TODO: Ident
         return nick + "!~" + username + "@" + hostname;

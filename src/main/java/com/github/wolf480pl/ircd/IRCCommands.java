@@ -20,10 +20,12 @@
 package com.github.wolf480pl.ircd;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import com.github.wolf480pl.ircd.util.AttributeKey;
+import com.github.wolf480pl.ircd.util.Util;
 
 public class IRCCommands {
     private final UserRegistry registry;
@@ -69,25 +71,30 @@ public class IRCCommands {
         }
 
         if (user.isRegistered()) {
-            String newNick;
-            if (registry != null) {
-                try {
-                    newNick = registry.changeNick(user, nick);
-                } catch (DropMessageException e) {
-                    if (!e.silently()) {
-                        user.send(user.numerics().rplTryAgain("NICK", e));
-                    }
-                    return;
-                }
+            CompletableFuture<String> futureNick;
+
+            if (registry == null) {
+                futureNick = CompletableFuture.completedFuture(nick);
+            } else {
+                futureNick = registry.changeNick(user, nick);
+            }
+
+            futureNick.thenAccept((String newNick) -> {
                 if (newNick == null) {
                     user.send(user.numerics().errNicknameInUse(nick));
-                    return;
+                } else {
+                    user.send(Message.withPrefix(user.getHostmask(), "NICK", newNick));
+                    user.setNick(newNick);
                 }
-            } else {
-                newNick = nick;
-            }
-            user.send(Message.withPrefix(user.getHostmask(), "NICK", newNick));
-            user.setNick(newNick);
+
+            }).exceptionally((Throwable t) -> {
+                if (!(t instanceof DropMessageException)) {
+                    throw Util.ensureUnchecked(t);
+                }
+
+                user.maybeSend(user.numerics().rplTryAgain("NICK", (DropMessageException) t));
+                return null;
+            });
         } else {
             RegistrationData regdata = user.attr(ATTR_REGDATA, makeRegdata).get();
 
@@ -130,21 +137,28 @@ public class IRCCommands {
             // Already registered
             return;
         }
-        if (registry != null) {
-            try {
-                registry.register(user);
-            } catch (DropMessageException e) {
-                if (!e.silently()) {
-                    // TODO: Should we differentiate between NICK and USER ?
-                    user.send(user.numerics().rplTryAgain("NICK", e));
-                }
-                return;
-            }
+        CompletableFuture<Void> future;
+        if (registry == null) {
+            future = CompletableFuture.completedFuture(null);
+        } else {
+            future = registry.register(user);
         }
-        user.send(user.numerics().rplWelcome("TODO"));
-        user.setRegisterd();
-        luser(user);
-        motd(user);
+
+        future.thenRun(() -> {
+            user.send(user.numerics().rplWelcome("TODO"));
+            user.setRegisterd();
+            luser(user);
+            motd(user);
+
+        }).exceptionally((Throwable t) -> {
+            if (!(t instanceof DropMessageException)) {
+                throw Util.ensureUnchecked(t);
+            }
+
+            // TODO: Should we differentiate between NICK and USER ?
+            user.maybeSend(user.numerics().rplTryAgain("NICK", (DropMessageException) t));
+            return null;
+        });
     }
 
     public void quit(User user, List<String> args) {

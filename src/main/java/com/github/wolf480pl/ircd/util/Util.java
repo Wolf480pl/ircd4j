@@ -17,17 +17,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.wolf480pl.ircd;
+package com.github.wolf480pl.ircd.util;
 
-import java.util.concurrent.CompletableFuture;
+public class Util {
 
-public interface UserRegistry {
+    private Util() {
+    }
 
-    User getUser(String nick);
-
-    CompletableFuture<Void> register(User user);
-
-    CompletableFuture<String> changeNick(User user, String newNick);
-
-    void unregister(User user) throws DropMessageException;
+    public static RuntimeException ensureUnchecked(Throwable t) {
+        if (t instanceof Error) {
+            throw (Error) t;
+        }
+        if (t instanceof RuntimeException) {
+            return (RuntimeException) t;
+        }
+        return new IllegalStateException("Unexpected checked exception", t);
+    }
 }
