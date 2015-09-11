@@ -98,6 +98,10 @@ public class NettySession implements Session {
         }
     }
 
+    public Channel getChannel() {
+        return channel;
+    }
+
     @Override
     public SocketAddress getRemoteAddress() {
         return channel.remoteAddress();

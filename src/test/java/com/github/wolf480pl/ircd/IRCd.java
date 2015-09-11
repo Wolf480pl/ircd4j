@@ -22,22 +22,32 @@ package com.github.wolf480pl.ircd;
 import java.net.InetSocketAddress;
 
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoop;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.wolf480pl.ircd.impl.IRCSessionHandler;
+import com.github.wolf480pl.ircd.impl.NettyExecutor;
 import com.github.wolf480pl.ircd.netty.NettyServer;
+import com.github.wolf480pl.ircd.netty.NettySession;
+import com.github.wolf480pl.ircd.util.EventExecutor;
 
 public class IRCd {
     public static void main(String[] args) throws InterruptedException {
         Logger logger = LoggerFactory.getLogger(IRCd.class);
         logger.info("Starting IRCd");
-        ChannelFuture f = new NettyServer(new InetSocketAddress(6667), new IRCSessionHandler()).start();
+        ChannelFuture f = new NettyServer(new InetSocketAddress(6667), new IRCSessionHandler(IRCd::executor)).start();
         f.sync(); // Wait for it to bind
         logger.info("IRCd started");
 
         f.channel().closeFuture().sync(); // Wait for it to close
+    }
+
+    private static EventExecutor executor(Session session) {
+        NettySession ns = (NettySession) session;
+        EventLoop loop = ns.getChannel().eventLoop();
+        return new NettyExecutor(loop);
     }
 
 }

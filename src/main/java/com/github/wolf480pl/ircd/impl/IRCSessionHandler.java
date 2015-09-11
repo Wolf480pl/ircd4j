@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,11 @@ import org.slf4j.LoggerFactory;
 import com.github.wolf480pl.ircd.Command;
 import com.github.wolf480pl.ircd.CommandRegistry;
 import com.github.wolf480pl.ircd.IRCCommands;
+import com.github.wolf480pl.ircd.IRCUser;
 import com.github.wolf480pl.ircd.Message;
 import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
-import com.github.wolf480pl.ircd.IRCUser;
+import com.github.wolf480pl.ircd.util.EventExecutor;
 
 public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private static final Logger logger = LoggerFactory.getLogger(IRCSessionHandler.class);
@@ -42,10 +44,12 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private final ConcurrentMap<Session, IRCUser> userMap = new ConcurrentHashMap<>();
     private final String serverName = "localhost";
     private final IRCCommands ircCmds;
+    private final Function<Session, EventExecutor> executorProvider;
 
-    public IRCSessionHandler() {
+    public IRCSessionHandler(Function<Session, EventExecutor> executorProvider) {
         this.ircCmds = new IRCCommands();
         ircCmds.register(this);
+        this.executorProvider = executorProvider;
         // TODO Auto-generated constructor stub
     }
 
@@ -95,7 +99,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
         if (user != null) {
             return user;
         }
-        IRCUser newUser = new IRCUser(session, serverName);
+        IRCUser newUser = new IRCUser(session, serverName, executorProvider.apply(session));
         user = userMap.putIfAbsent(session, newUser);
         return user == null ? newUser : user;
     }

@@ -22,6 +22,7 @@ package com.github.wolf480pl.ircd;
 import java.util.function.Supplier;
 
 import com.github.wolf480pl.ircd.util.AttributeKey;
+import com.github.wolf480pl.ircd.util.EventExecutor;
 
 public interface User {
 
@@ -46,6 +47,8 @@ public interface User {
     boolean isRegistered();
 
     boolean isQuitted();
+
+    EventExecutor executor();
 
     <T> T attr(AttributeKey<T> key);
 

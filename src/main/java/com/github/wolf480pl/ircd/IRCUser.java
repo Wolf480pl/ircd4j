@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.wolf480pl.ircd.util.AbstractAttrMap;
+import com.github.wolf480pl.ircd.util.EventExecutor;
 import com.github.wolf480pl.ircd.util.FunctionalMutableString;
 
 
@@ -34,6 +35,7 @@ public class IRCUser extends AbstractAttrMap implements User {
     private final Session session;
     private final ConcurrentMap<Class<? extends IRCNumerics>, IRCNumerics> numericsCache = new ConcurrentHashMap<>();
     private final String server;
+    private final EventExecutor executor;
     private final FunctionalMutableString nickRef;
     private final AtomicBoolean pingSent = new AtomicBoolean(false);
     private final AtomicBoolean isRegistered = new AtomicBoolean(false);
@@ -43,9 +45,10 @@ public class IRCUser extends AbstractAttrMap implements User {
     private String hostname;
     private String realName;
 
-    public IRCUser(Session session, String server) {
+    public IRCUser(Session session, String server, EventExecutor executor) {
         this.session = session;
         this.server = server;
+        this.executor = executor;
         this.nickRef = new FunctionalMutableString(this::getNick);
     }
 
@@ -156,6 +159,11 @@ public class IRCUser extends AbstractAttrMap implements User {
 
     public boolean setQuitted() {
         return quitted.compareAndSet(false, true);
+    }
+
+    @Override
+    public EventExecutor executor() {
+        return executor;
     }
 
     // non-API
