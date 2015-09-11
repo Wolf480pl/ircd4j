@@ -17,40 +17,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.wolf480pl.ircd;
+package com.github.wolf480pl.ircd.util;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
-import com.github.wolf480pl.ircd.util.AttributeKey;
+public class AbstractAttrMap implements AttrMap {
 
-public interface User {
+    private final ConcurrentMap<AttributeKey<?>, Object> attrs = new ConcurrentHashMap<>();
 
-    String getNick();
+    public AbstractAttrMap() {
+        super();
+    }
 
-    String getUsername();
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T attr(AttributeKey<T> key) {
+        return (T) attrs.get(key);
+    }
 
-    String getRealName();
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T attr(AttributeKey<T> key, T putIfAbsent) {
+        return (T) attrs.putIfAbsent(key, putIfAbsent);
+    }
 
-    String getHostname();
-
-    Session getSession();
-
-    void send(Message msg);
-
-    void maybeSend(Message msgOrNull);
-
-    String getHostmask();
-
-    String getServer();
-
-    boolean isRegistered();
-
-    boolean isQuitted();
-
-    <T> T attr(AttributeKey<T> key);
-
-    <T> T attr(AttributeKey<T> key, T putIfAbsent);
-
-    <T> T attr(AttributeKey<T> key, Supplier<T> factory);
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T attr(AttributeKey<T> key, Supplier<T> factory) {
+        return (T) attrs.computeIfAbsent(key, (x) -> factory.get());
+    }
 
 }

@@ -17,35 +17,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.wolf480pl.ircd;
+package com.github.wolf480pl.ircd.util;
 
 import java.util.function.Supplier;
 
-import com.github.wolf480pl.ircd.util.AttributeKey;
-
-public interface User {
-
-    String getNick();
-
-    String getUsername();
-
-    String getRealName();
-
-    String getHostname();
-
-    Session getSession();
-
-    void send(Message msg);
-
-    void maybeSend(Message msgOrNull);
-
-    String getHostmask();
-
-    String getServer();
-
-    boolean isRegistered();
-
-    boolean isQuitted();
+public interface AttrMap {
 
     <T> T attr(AttributeKey<T> key);
 

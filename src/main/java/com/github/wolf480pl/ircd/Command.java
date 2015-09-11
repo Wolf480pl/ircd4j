@@ -22,5 +22,5 @@ package com.github.wolf480pl.ircd;
 import java.util.List;
 
 public interface Command {
-    void execute(User user, List<String> args);
+    void execute(IRCUser user, List<String> args);
 }

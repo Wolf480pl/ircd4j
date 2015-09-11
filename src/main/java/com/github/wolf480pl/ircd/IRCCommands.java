@@ -48,7 +48,7 @@ public class IRCCommands {
 
     private static final AttributeKey<AtomicReference<RegistrationData>> ATTR_REGDATA = AttributeKey.valueOf(RegistrationData.class.getCanonicalName());
 
-    public void nick(User user, List<String> args) {
+    public void nick(IRCUser user, List<String> args) {
         if (args.size() < 1) {
             user.send(user.numerics().errNoNickNameGiven());
             return;
@@ -107,7 +107,7 @@ public class IRCCommands {
         }
     }
 
-    public void user(User user, List<String> args) {
+    public void user(IRCUser user, List<String> args) {
         if (args.size() < 4) {
             user.send(user.numerics().errNeedMoreParams("USER"));
             return;
@@ -131,7 +131,7 @@ public class IRCCommands {
         }
     }
 
-    protected void registerUser(User user) {
+    protected void registerUser(IRCUser user) {
         RegistrationData regdata = user.attr(ATTR_REGDATA).getAndSet(null);
         if (regdata == null) {
             // Already registered
@@ -161,7 +161,7 @@ public class IRCCommands {
         });
     }
 
-    public void quit(User user, List<String> args) {
+    public void quit(IRCUser user, List<String> args) {
         String reason;
         if (args.size() < 1) {
             reason = user.getNick();
@@ -171,7 +171,7 @@ public class IRCCommands {
         quit(user, reason);
     }
 
-    public void ping(User user, List<String> args) {
+    public void ping(IRCUser user, List<String> args) {
         if (args.size() < 1) {
             user.send(user.numerics().errNeedMoreParams("PING"));
             return;
@@ -193,7 +193,7 @@ public class IRCCommands {
 
     }
 
-    public void quit(User user, String reason) {
+    public void quit(IRCUser user, String reason) {
         if (!user.setQuitted()) {
             // Quit already broadcasted
             return;
@@ -208,7 +208,7 @@ public class IRCCommands {
         user.getSession().getLogger().debug("B " + Message.withPrefix(user.getHostmask(), "QUIT", reason));
     }
 
-    public void luser(User user) {
+    public void luser(IRCUser user) {
         //TODO get some sensible numbers into the vars below
         int users = 1;
         int invisible = 0;
@@ -220,13 +220,13 @@ public class IRCCommands {
         user.send(user.numerics().rplLuserMe(myClients, myServers));
     }
 
-    public void motd(User user) {
+    public void motd(IRCUser user) {
         user.send(user.numerics().rplMotdStart());
         user.send(user.numerics().rplMotd(" === TODO === ")); //TODO
         user.send(user.numerics().rplEndOfMotd());
     }
 
-    public void ping(User user) {
+    public void ping(IRCUser user) {
         final String server = user.getServer();
         user.send(Message.withoutPrefix("PING", server));
     }

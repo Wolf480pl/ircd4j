@@ -33,13 +33,13 @@ import com.github.wolf480pl.ircd.IRCCommands;
 import com.github.wolf480pl.ircd.Message;
 import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
-import com.github.wolf480pl.ircd.User;
+import com.github.wolf480pl.ircd.IRCUser;
 
 public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private static final Logger logger = LoggerFactory.getLogger(IRCSessionHandler.class);
 
     private final Map<String, Command> commandMap = new HashMap<>();
-    private final ConcurrentMap<Session, User> userMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Session, IRCUser> userMap = new ConcurrentHashMap<>();
     private final String serverName = "localhost";
     private final IRCCommands ircCmds;
 
@@ -53,7 +53,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     public void messageReceived(Session session, Message msg) {
         logger.debug("" + session.getRemoteAddress() + " -> " + msg);
 
-        User user = getUser(session);
+        IRCUser user = getUser(session);
         user.resolveHostName();
 
         user.clearPingSent();
@@ -90,12 +90,12 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
         return logger;
     }
 
-    protected User getUser(Session session) {
-        User user = userMap.get(session);
+    protected IRCUser getUser(Session session) {
+        IRCUser user = userMap.get(session);
         if (user != null) {
             return user;
         }
-        User newUser = new User(session, serverName);
+        IRCUser newUser = new IRCUser(session, serverName);
         user = userMap.putIfAbsent(session, newUser);
         return user == null ? newUser : user;
     }
@@ -107,7 +107,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
 
     @Override
     public void onInboundIdle(Session session) {
-        User user = getUser(session);
+        IRCUser user = getUser(session);
         logger.debug("User idle: " + user.getNick());
         if (user.setPingSent()) {
             ircCmds.ping(user);
@@ -119,7 +119,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
 
     @Override
     public void onDisconnect(Session session) {
-        final User user = getUser(session);
+        final IRCUser user = getUser(session);
         if (user.setQuitted()) {
             ircCmds.onQuit(user, "Connection closed by peer");
         }
