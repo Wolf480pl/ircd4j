@@ -26,8 +26,14 @@ import java.util.function.Supplier;
 import com.github.wolf480pl.ircd.util.AttributeKey;
 
 public class IRCCommands {
+    private final UserRegistry registry;
 
     public IRCCommands() {
+        this(null);
+    }
+
+    public IRCCommands(UserRegistry registry) {
+        this.registry = registry;
     }
 
     public void register(CommandRegistry handler) {
@@ -52,11 +58,28 @@ public class IRCCommands {
             return;
         }
 
-        //TODO: check for collisions, maintain a nick->user map
+        if (registry != null && registry.getUser(nick) != null) {
+            /* RFC 1459 says if it's during registration, this should be ERR_NICKCOLLISION,
+             * but RFC 2812 says NICKCOLLISION is only if both are already registered.
+             * As for ERR_NICKNAMEINUSE, both RFCs say it's for nick change only.
+             * However, HexChat, ZNC, and Charybdis expect/send NICKNAMEINUSE in both cases, so that's what we do.
+             */
+            user.send(user.numerics().errNicknameInUse(nick));
+            return;
+        }
 
         if (user.isRegistered()) {
-            //TODO: broadcast this
-            user.send(Message.withPrefix(user.getHostmask(), "NICK", nick));
+            String newNick;
+            if (registry != null) {
+                newNick = registry.changeNick(user, nick);
+                if (newNick == null) {
+                    user.send(user.numerics().errNicknameInUse(nick));
+                    return;
+                }
+            } else {
+                newNick = nick;
+            }
+            user.send(Message.withPrefix(user.getHostmask(), "NICK", newNick));
             user.setNick(nick);
         } else {
             RegistrationData regdata = user.attr(ATTR_REGDATA, makeRegdata).get();
@@ -99,6 +122,11 @@ public class IRCCommands {
         if (regdata == null) {
             // Already registered
             return;
+        }
+        if (registry != null) {
+            if (!registry.register(user)) {
+                return;
+            }
         }
         user.send(user.numerics().rplWelcome("TODO"));
         user.setRegisterd();
