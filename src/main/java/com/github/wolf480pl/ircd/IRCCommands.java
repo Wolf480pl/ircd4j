@@ -87,7 +87,7 @@ public class IRCCommands {
                 newNick = nick;
             }
             user.send(Message.withPrefix(user.getHostmask(), "NICK", newNick));
-            user.setNick(nick);
+            user.setNick(newNick);
         } else {
             RegistrationData regdata = user.attr(ATTR_REGDATA, makeRegdata).get();
 
