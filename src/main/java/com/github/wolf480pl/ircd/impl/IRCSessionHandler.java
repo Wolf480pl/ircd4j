@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.wolf480pl.ircd.Command;
 import com.github.wolf480pl.ircd.CommandRegistry;
@@ -36,7 +36,7 @@ import com.github.wolf480pl.ircd.SessionHandler;
 import com.github.wolf480pl.ircd.User;
 
 public class IRCSessionHandler implements SessionHandler, CommandRegistry {
-    private static final Logger logger = LogManager.getLogger(IRCSessionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(IRCSessionHandler.class);
 
     private final Map<String, Command> commandMap = new HashMap<>();
     private final ConcurrentMap<Session, User> userMap = new ConcurrentHashMap<>();

@@ -23,15 +23,15 @@ import java.net.InetSocketAddress;
 
 import io.netty.channel.ChannelFuture;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.wolf480pl.ircd.impl.IRCSessionHandler;
 import com.github.wolf480pl.ircd.netty.NettyServer;
 
 public class IRCd {
     public static void main(String[] args) throws InterruptedException {
-        Logger logger = LogManager.getLogger(IRCd.class);
+        Logger logger = LoggerFactory.getLogger(IRCd.class);
         logger.info("Starting IRCd");
         ChannelFuture f = new NettyServer(new InetSocketAddress(6667), new IRCSessionHandler()).start();
         f.sync(); // Wait for it to bind

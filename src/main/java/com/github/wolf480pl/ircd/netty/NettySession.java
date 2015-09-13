@@ -51,7 +51,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import com.github.wolf480pl.ircd.Message;
 import com.github.wolf480pl.ircd.Session;

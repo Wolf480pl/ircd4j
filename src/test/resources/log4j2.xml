@@ -14,5 +14,6 @@
       <AppenderRef ref="Console"/>
       <AppenderRef ref="RollingFile"/>
     </Root>
+    <Logger name="io.netty" level="info"></Logger>
   </Loggers>
 </Configuration>

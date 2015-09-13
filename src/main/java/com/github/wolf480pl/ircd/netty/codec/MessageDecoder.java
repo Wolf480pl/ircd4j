@@ -26,8 +26,8 @@ import java.util.regex.Matcher;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.wolf480pl.ircd.IRCRegexes;
 import com.github.wolf480pl.ircd.Message;
@@ -35,7 +35,7 @@ import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
 
 public class MessageDecoder extends MessageToMessageDecoder<String> {
-    private static Logger logger = LogManager.getLogger(MessageDecoder.class);
+    private static Logger logger = LoggerFactory.getLogger(MessageDecoder.class);
 
     @Override
     protected void decode(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
