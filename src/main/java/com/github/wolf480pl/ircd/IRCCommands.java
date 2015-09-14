@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import com.github.wolf480pl.ircd.util.AttributeKey;
-import com.github.wolf480pl.ircd.util.Util;
+import com.github.wolf480pl.ircd.util.ExHandler;
 
 public class IRCCommands {
     private final UserRegistry registry;
@@ -79,7 +79,7 @@ public class IRCCommands {
                 futureNick = registry.changeNick(user, nick);
             }
 
-            futureNick.thenAccept((String newNick) -> {
+            user.maybeEnqueue(futureNick).thenAccept((String newNick) -> {
                 if (newNick == null) {
                     user.send(user.numerics().errNicknameInUse(nick));
                 } else {
@@ -87,9 +87,9 @@ public class IRCCommands {
                     user.setNick(newNick);
                 }
 
-            }).exceptionally((Throwable t) -> {
+            }).exceptionally((ExHandler<Void>) (Throwable t) -> {
                 if (!(t instanceof DropMessageException)) {
-                    throw Util.ensureUnchecked(t);
+                    throw t;
                 }
 
                 user.maybeSend(user.numerics().rplTryAgain("NICK", (DropMessageException) t));
@@ -144,15 +144,15 @@ public class IRCCommands {
             future = registry.register(user);
         }
 
-        future.thenRun(() -> {
+        user.maybeEnqueue(future).thenRun(() -> {
             user.send(user.numerics().rplWelcome("TODO"));
             user.setRegisterd();
             luser(user);
             motd(user);
 
-        }).exceptionally((Throwable t) -> {
+        }).exceptionally((ExHandler<Void>) (Throwable t) -> {
             if (!(t instanceof DropMessageException)) {
-                throw Util.ensureUnchecked(t);
+                throw t;
             }
 
             // TODO: Should we differentiate between NICK and USER ?

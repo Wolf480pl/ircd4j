@@ -19,10 +19,12 @@
  */
 package com.github.wolf480pl.ircd;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import com.github.wolf480pl.ircd.util.AttributeKey;
 import com.github.wolf480pl.ircd.util.EventExecutor;
+import com.github.wolf480pl.ircd.util.Util;
 
 public interface User {
 
@@ -49,6 +51,39 @@ public interface User {
     boolean isQuitted();
 
     EventExecutor executor();
+
+    default CompletableFuture<Void> enqueueRun(Runnable runnable) {
+        if (executor().inEventLoop()) {
+            runnable.run();
+            return CompletableFuture.completedFuture(null);
+        }
+        return CompletableFuture.runAsync(runnable, executor());
+    }
+
+    default <T> CompletableFuture<T> enqueueSupply(Supplier<T> supplier) {
+        if (executor().inEventLoop()) {
+            return CompletableFuture.completedFuture(supplier.get());
+        }
+        return CompletableFuture.supplyAsync(supplier, executor());
+    }
+
+    /**
+     * Returns a future that completes in the {@link User#executor()}'s thread
+     * when the provided {@code future} completes.
+     * <p>
+     * IMPORTANT: stages appended to the resulting future <strong>may be
+     * executed in the caller's thread</strong> if the future is
+     * already done at the time the next stage is appended, so <strong>don't use
+     * this for thread-safety unless you're already
+     * {@link EventExecutor#inEventLoop() in the event loop}</strong> at the
+     * time of adding next stages.
+     *
+     * @param future
+     * @return
+     */
+    default <T> CompletableFuture<T> maybeEnqueue(CompletableFuture<T> future) {
+        return future.handleAsync(Util.passthruHandler(), executor());
+    }
 
     <T extends UserAPI> T api(Class<T> clazz);
 

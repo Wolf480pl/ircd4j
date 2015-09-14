@@ -33,4 +33,15 @@ public class Util {
         }
         return new IllegalStateException("Unexpected checked exception", t);
     }
+
+    public static <T> T passthruHandle(T res, Throwable ex) throws Throwable {
+        if (ex != null) {
+            throw ex;
+        }
+        return res;
+    }
+
+    public static <T> BiHandler<T, T> passthruHandler() {
+        return Util::passthruHandle;
+    }
 }
