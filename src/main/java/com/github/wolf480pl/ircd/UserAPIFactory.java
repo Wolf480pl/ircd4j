@@ -19,43 +19,7 @@
  */
 package com.github.wolf480pl.ircd;
 
-import java.util.function.Supplier;
-
-import com.github.wolf480pl.ircd.util.AttributeKey;
-import com.github.wolf480pl.ircd.util.EventExecutor;
-
-public interface User {
-
-    String getNick();
-
-    String getUsername();
-
-    String getRealName();
-
-    String getHostname();
-
-    Session getSession();
-
-    void send(Message msg);
-
-    void maybeSend(Message msgOrNull);
-
-    String getHostmask();
-
-    String getServer();
-
-    boolean isRegistered();
-
-    boolean isQuitted();
-
-    EventExecutor executor();
-
-    <T extends UserAPI> T api(Class<T> clazz);
-
-    <T> T attr(AttributeKey<T> key);
-
-    <T> T attr(AttributeKey<T> key, T putIfAbsent);
-
-    <T> T attr(AttributeKey<T> key, Supplier<T> factory);
-
+@FunctionalInterface
+public interface UserAPIFactory {
+    <T extends UserAPI> T newInstance(Class<T> clazz);
 }

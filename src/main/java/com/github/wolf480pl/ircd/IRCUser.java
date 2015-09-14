@@ -34,8 +34,10 @@ import com.github.wolf480pl.ircd.util.FunctionalMutableString;
 public class IRCUser extends AbstractAttrMap implements User {
     private final Session session;
     private final ConcurrentMap<Class<? extends IRCNumerics>, IRCNumerics> numericsCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends UserAPI>, UserAPI> apiCache = new ConcurrentHashMap<>();
     private final String server;
     private final EventExecutor executor;
+    private final UserAPIFactory apiFactory;
     private final FunctionalMutableString nickRef;
     private final AtomicBoolean pingSent = new AtomicBoolean(false);
     private final AtomicBoolean isRegistered = new AtomicBoolean(false);
@@ -45,10 +47,11 @@ public class IRCUser extends AbstractAttrMap implements User {
     private String hostname;
     private String realName;
 
-    public IRCUser(Session session, String server, EventExecutor executor) {
+    public IRCUser(Session session, String server, EventExecutor executor, UserAPIFactory apiFactory) {
         this.session = session;
         this.server = server;
         this.executor = executor;
+        this.apiFactory = apiFactory;
         this.nickRef = new FunctionalMutableString(this::getNick);
     }
 
@@ -123,6 +126,12 @@ public class IRCUser extends AbstractAttrMap implements User {
             }
         }
         return numerics;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends UserAPI> T api(Class<T> clazz) {
+        return (T) apiCache.computeIfAbsent(clazz, (clz) -> apiFactory.newInstance(clz));
     }
 
     @Override

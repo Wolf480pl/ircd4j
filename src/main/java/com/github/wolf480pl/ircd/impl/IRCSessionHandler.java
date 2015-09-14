@@ -35,6 +35,7 @@ import com.github.wolf480pl.ircd.IRCUser;
 import com.github.wolf480pl.ircd.Message;
 import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
+import com.github.wolf480pl.ircd.UserAPI;
 import com.github.wolf480pl.ircd.util.EventExecutor;
 
 public class IRCSessionHandler implements SessionHandler, CommandRegistry {
@@ -99,7 +100,7 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
         if (user != null) {
             return user;
         }
-        IRCUser newUser = new IRCUser(session, serverName, executorProvider.apply(session));
+        IRCUser newUser = new IRCUser(session, serverName, executorProvider.apply(session), IRCSessionHandler::nullApiFactory);
         user = userMap.putIfAbsent(session, newUser);
         return user == null ? newUser : user;
     }
@@ -128,6 +129,10 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
             ircCmds.onQuit(user, "Connection closed by peer");
         }
         userMap.remove(session);
+    }
+
+    private static <T extends UserAPI> T nullApiFactory(Class<T> clazz) {
+        return null;
     }
 }
 
