@@ -87,6 +87,10 @@ public interface User {
 
     <T extends UserAPI> T api(Class<T> clazz);
 
+    default UserAPI api() {
+        return api(UserAPI.class);
+    }
+
     <T> T attr(AttributeKey<T> key);
 
     <T> T attr(AttributeKey<T> key, T putIfAbsent);

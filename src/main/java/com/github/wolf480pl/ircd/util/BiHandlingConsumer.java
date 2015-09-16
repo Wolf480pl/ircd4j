@@ -17,9 +17,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.wolf480pl.ircd;
+package com.github.wolf480pl.ircd.util;
 
-@FunctionalInterface
-public interface UserAPIFactory {
-    <T extends UserAPI> T newInstance(Class<T> clazz, User user);
+import java.util.concurrent.CompletionException;
+import java.util.function.BiConsumer;
+
+public interface BiHandlingConsumer<T> extends BiConsumer<T, Throwable> {
+
+    void handle(T res, Throwable ex) throws Throwable;
+
+    @Override
+    default void accept(T res, Throwable t) {
+        if (t instanceof CompletionException) {
+            t = t.getCause();
+        }
+        try {
+            handle(res, t);
+        } catch (Throwable e) {
+            throw new CompletionException(e);
+        }
+    }
 }

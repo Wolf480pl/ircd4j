@@ -131,7 +131,7 @@ public class IRCUser extends AbstractAttrMap implements User {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends UserAPI> T api(Class<T> clazz) {
-        return (T) apiCache.computeIfAbsent(clazz, (clz) -> apiFactory.newInstance(clz));
+        return (T) apiCache.computeIfAbsent(clazz, (clz) -> apiFactory.newInstance(clz, this));
     }
 
     @Override

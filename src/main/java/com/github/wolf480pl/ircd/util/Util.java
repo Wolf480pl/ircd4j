@@ -19,6 +19,8 @@
  */
 package com.github.wolf480pl.ircd.util;
 
+import java.util.concurrent.CompletableFuture;
+
 public class Util {
 
     private Util() {
@@ -43,5 +45,19 @@ public class Util {
 
     public static <T> BiHandler<T, T> passthruHandler() {
         return Util::passthruHandle;
+    }
+
+    public static <T> BiHandlingConsumer<T> passthruJumper(CompletableFuture<T> dst) {
+        return (res, ex) -> {
+            if (ex != null) {
+                dst.completeExceptionally(ex);
+            } else {
+                dst.complete(res);
+            }
+        };
+    }
+
+    public static <T> void jumpFuture(CompletableFuture<T> src, CompletableFuture<T> dst) {
+        dst.whenComplete(passthruJumper(dst));
     }
 }

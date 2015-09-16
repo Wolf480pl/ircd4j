@@ -71,20 +71,9 @@ public class IRCCommands {
         }
 
         if (user.isRegistered()) {
-            CompletableFuture<String> futureNick;
-
-            if (registry == null) {
-                futureNick = CompletableFuture.completedFuture(nick);
-            } else {
-                futureNick = registry.changeNick(user, nick);
-            }
-
-            user.maybeEnqueue(futureNick).thenAccept((String newNick) -> {
+            changeNick(user, nick).thenAccept((String newNick) -> {
                 if (newNick == null) {
                     user.send(user.numerics().errNicknameInUse(nick));
-                } else {
-                    user.send(Message.withPrefix(user.getHostmask(), "NICK", newNick));
-                    user.setNick(newNick);
                 }
 
             }).exceptionally((ExHandler<Void>) (Throwable t) -> {
@@ -105,6 +94,24 @@ public class IRCCommands {
                 registerUser(user);
             }
         }
+    }
+
+    public CompletableFuture<String> changeNick(IRCUser user, String nick) {
+        CompletableFuture<String> futureNick;
+
+        if (registry == null) {
+            futureNick = CompletableFuture.completedFuture(nick);
+        } else {
+            futureNick = registry.changeNick(user, nick);
+        }
+
+        return user.maybeEnqueue(futureNick).thenApply((String newNick) -> {
+            if (newNick != null) {
+                user.send(Message.withPrefix(user.getHostmask(), "NICK", newNick));
+                user.setNick(newNick);
+            }
+            return newNick;
+        });
     }
 
     public void user(IRCUser user, List<String> args) {

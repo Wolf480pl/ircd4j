@@ -19,6 +19,9 @@
  */
 package com.github.wolf480pl.ircd;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface UserAPI {
 
+    CompletableFuture<String> nick(String nick);
 }
