@@ -37,6 +37,7 @@ import com.github.wolf480pl.ircd.Session;
 import com.github.wolf480pl.ircd.SessionHandler;
 import com.github.wolf480pl.ircd.User;
 import com.github.wolf480pl.ircd.UserAPI;
+import com.github.wolf480pl.ircd.UserRegistry;
 import com.github.wolf480pl.ircd.util.EventExecutor;
 
 public class IRCSessionHandler implements SessionHandler, CommandRegistry {
@@ -48,8 +49,8 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private final IRCCommands ircCmds;
     private final Function<Session, EventExecutor> executorProvider;
 
-    public IRCSessionHandler(Function<Session, EventExecutor> executorProvider) {
-        this.ircCmds = new IRCCommands();
+    public IRCSessionHandler(Function<Session, EventExecutor> executorProvider, UserRegistry registry) {
+        this.ircCmds = new IRCCommands(registry);
         ircCmds.register(this);
         this.executorProvider = executorProvider;
         // TODO Auto-generated constructor stub

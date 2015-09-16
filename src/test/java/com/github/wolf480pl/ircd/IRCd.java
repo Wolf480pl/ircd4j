@@ -37,7 +37,7 @@ public class IRCd {
     public static void main(String[] args) throws InterruptedException {
         Logger logger = LoggerFactory.getLogger(IRCd.class);
         logger.info("Starting IRCd");
-        ChannelFuture f = new NettyServer(new InetSocketAddress(6667), new IRCSessionHandler(IRCd::executor)).start();
+        ChannelFuture f = new NettyServer(new InetSocketAddress(6667), new IRCSessionHandler(IRCd::executor, null)).start();
         f.sync(); // Wait for it to bind
         logger.info("IRCd started");
 
