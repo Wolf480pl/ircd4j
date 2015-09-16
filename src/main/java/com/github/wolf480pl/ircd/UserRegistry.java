@@ -29,5 +29,5 @@ public interface UserRegistry {
 
     CompletableFuture<String> changeNick(User user, String newNick);
 
-    void unregister(User user) throws DropMessageException;
+    void unregister(User user);
 }

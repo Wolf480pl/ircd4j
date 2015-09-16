@@ -201,16 +201,18 @@ public class IRCCommands {
     }
 
     public void quit(IRCUser user, String reason) {
-        if (!user.setQuitted()) {
-            // Quit already broadcasted
-            return;
+        if (user.setQuitted() && user.isRegistered()) {
+            // Quit not broadcasted yet, and user already registered.
+            user.send(Message.withPrefix(user.getHostmask(), "QUIT", reason));
+            onQuit(user, reason);
         }
-        user.send(Message.withPrefix(user.getHostmask(), "QUIT", reason));
         user.getSession().disconnect();
-        onQuit(user, reason);
     }
 
     public void onQuit(User user, String reason) {
+        if (registry != null) {
+            registry.unregister(user);
+        }
         // TODO: broadcast this
         user.getSession().getLogger().debug("B " + Message.withPrefix(user.getHostmask(), "QUIT", reason));
     }
