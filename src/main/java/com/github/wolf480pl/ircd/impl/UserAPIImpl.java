@@ -51,4 +51,10 @@ public class UserAPIImpl implements UserAPI {
         return resultFuture;
     }
 
+    @Override
+    public CompletableFuture<Void> kill(String reason) {
+        return user.enqueueRun(() -> {
+            ircCommands.quit(user, reason);
+        });
+    }
 }

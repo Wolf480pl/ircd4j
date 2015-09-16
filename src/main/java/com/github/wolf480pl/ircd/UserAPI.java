@@ -24,4 +24,6 @@ import java.util.concurrent.CompletableFuture;
 public interface UserAPI {
 
     CompletableFuture<String> nick(String nick);
+
+    CompletableFuture<Void> kill(String reason);
 }
