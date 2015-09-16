@@ -60,4 +60,10 @@ public class Util {
     public static <T> void jumpFuture(CompletableFuture<T> src, CompletableFuture<T> dst) {
         dst.whenComplete(passthruJumper(dst));
     }
+
+    public static <T> CompletableFuture<T> failedFuture(Throwable t) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        future.completeExceptionally(t);
+        return future;
+    }
 }
