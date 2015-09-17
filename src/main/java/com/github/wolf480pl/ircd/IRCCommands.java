@@ -244,19 +244,25 @@ public class IRCCommands {
 
     }
 
-    public void join(IRCUser user, String channel, String key) {
+    protected void join(IRCUser user, String channel, String key) {
         if (chanReg != null) {
             Channel chan = chanReg.getChannel(channel);
             if (chan != null) {
-                join(user, chan, key);
+                join(user, chan, key).exceptionally(dropHandler(user, "JOIN")).exceptionally((ExHandler<Void>) ex -> {
+                    if (ex instanceof JoinRefusedException) {
+                        user.send(user.numerics().joinRefused(channel, (JoinRefusedException) ex));
+                        return null;
+                    }
+                    throw ex;
+                });
                 return;
             }
         }
         user.send(user.numerics().errNoSuchChannel(channel));
     }
 
-    public void join(IRCUser user, Channel channel, String key) {
-        user.maybeEnqueue(channel.join(user, key)).thenRun(() -> {
+    public CompletableFuture<Void> join(IRCUser user, Channel channel, String key) {
+        return user.maybeEnqueue(channel.join(user, key)).thenRun(() -> {
             String chanName = channel.getName();
             user.send(Message.withPrefix(user.getHostmask(), "JOIN", chanName));
 
@@ -270,30 +276,29 @@ public class IRCCommands {
             // names() sends numereics. Numerics contain the user's nick, so they need to be sent from his event loop,
             // and channel.getMembers() may finish in any thread, so we need to use user.maybeEnqueue().
             user.maybeEnqueue(channel.getMembers()).thenAccept(names(user, chanName, true));
-        }).exceptionally((ex) -> {
-            // TODO
-            return null;
         });
     }
 
-    public void part(IRCUser user, String chan) {
+    protected void part(IRCUser user, String chan) {
         if (chanReg != null) {
             Channel channel = chanReg.getChannel(chan);
             if (channel != null) {
-                part(user, channel);
+                part(user, channel).exceptionally(dropHandler(user, "PART")).exceptionally((ExHandler<Void>) ex -> {
+                    if (!(ex instanceof NotOnChannelException)) {
+                        throw ex;
+                    }
+                    user.send(user.numerics().errNotOnChannel(channel.getName()));
+                    return null;
+                });
                 return;
             }
         }
         user.send(user.numerics().errNoSuchChannel(chan));
     }
 
-    public void part(IRCUser user, Channel channel) {
-        user.maybeEnqueue(channel.part(user)).thenAccept(success -> {
-            if (success) {
-                user.send(Message.withPrefix(user.getHostmask(), "PART", channel.getName()));
-            } else {
-                user.send(user.numerics().errNotOnChannel(channel.getName()));
-            }
+    public CompletableFuture<Void> part(IRCUser user, Channel channel) {
+        return user.maybeEnqueue(channel.part(user)).thenRun(() -> {
+            user.send(Message.withPrefix(user.getHostmask(), "PART", channel.getName()));
         });
     }
 

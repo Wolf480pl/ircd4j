@@ -19,18 +19,36 @@
  */
 package com.github.wolf480pl.ircd;
 
-import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+public class JoinRefusedException extends Exception {
+    private static final long serialVersionUID = -3917619542388566374L;
 
-public interface Channel {
+    private final Reason reason;
 
-    String getName();
+    public JoinRefusedException(Reason reason) {
+        super();
+        this.reason = reason;
+    }
 
-    String getTopic();
+    public JoinRefusedException(Reason reason, String message) {
+        super(message);
+        this.reason = reason;
+    }
 
-    CompletableFuture<Void> join(User user, String key);
+    public JoinRefusedException(Reason reason, Throwable cause) {
+        super(cause);
+        this.reason = reason;
+    }
 
-    CompletableFuture<Void> part(User user);
+    public JoinRefusedException(Reason reason, String message, Throwable cause) {
+        super(message, cause);
+        this.reason = reason;
+    }
 
-    CompletableFuture<Collection<User>> getMembers();
+    public Reason reason() {
+        return reason;
+    }
+
+    public enum Reason {
+        BANNED, NEED_INVITE, WRONG_PASSWORD, CHANNEL_FULL, TOO_MANY_CHANNELS
+    }
 }

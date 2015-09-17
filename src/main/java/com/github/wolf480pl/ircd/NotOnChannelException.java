@@ -19,18 +19,21 @@
  */
 package com.github.wolf480pl.ircd;
 
-import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+public class NotOnChannelException extends Exception {
+    private static final long serialVersionUID = 1L;
 
-public interface Channel {
+    public NotOnChannelException() {
+    }
 
-    String getName();
+    public NotOnChannelException(String message) {
+        super(message);
+    }
 
-    String getTopic();
+    public NotOnChannelException(Throwable cause) {
+        super(cause);
+    }
 
-    CompletableFuture<Void> join(User user, String key);
-
-    CompletableFuture<Void> part(User user);
-
-    CompletableFuture<Collection<User>> getMembers();
+    public NotOnChannelException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

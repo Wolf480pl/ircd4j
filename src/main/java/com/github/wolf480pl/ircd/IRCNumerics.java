@@ -288,4 +288,46 @@ public class IRCNumerics {
     public Message errAlreadyRegistered() {
         return numeric(ERR_ALREADYREGISTERED, "You may not reregister");
     }
+
+    public static final int ERR_CHANNELISFULL = 471;
+
+    public Message errChannelIsFull(String channel) {
+        return numeric(ERR_CHANNELISFULL, channel, "Cannot join channel (+l)");
+    }
+
+    public static final int ERR_INVITEONLYCHAN = 473;
+
+    public Message errInviteOnlyChan(String channel) {
+        return numeric(ERR_INVITEONLYCHAN, channel, "Cannot join channel (+i)");
+    }
+
+    public static final int ERR_BANNEDFROMCHAN = 474;
+
+    public Message errBannedFromChan(String channel) {
+        return numeric(ERR_BANNEDFROMCHAN, channel, "Cannot join channel (+b)");
+    }
+
+    public static final int ERR_BADCHANNELKEY = 475;
+
+    public Message errBadChannelKey(String channel) {
+        return numeric(ERR_BADCHANNELKEY, channel, "Cannot join channel (+k)");
+    }
+
+    public Message joinRefused(String channel, JoinRefusedException ex) {
+        JoinRefusedException.Reason reason = ex.reason();
+        switch (reason) {
+            case BANNED:
+                return errBannedFromChan(channel);
+            case NEED_INVITE:
+                return errInviteOnlyChan(channel);
+            case WRONG_PASSWORD:
+                return errBadChannelKey(channel);
+            case CHANNEL_FULL:
+                return errChannelIsFull(channel);
+            case TOO_MANY_CHANNELS:
+                return errTooManyChannels(channel);
+        }
+        throw new IllegalStateException("Unexpected JoinForbiddenException reason: " + reason, ex);
+    }
+
 }

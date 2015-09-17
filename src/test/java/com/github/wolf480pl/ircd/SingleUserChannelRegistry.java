@@ -25,6 +25,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.github.wolf480pl.ircd.util.Util;
+
 public class SingleUserChannelRegistry implements ChannelRegistry {
     private ConcurrentMap<String, Channel> chanMap = new ConcurrentHashMap<>();
 
@@ -63,13 +65,12 @@ public class SingleUserChannelRegistry implements ChannelRegistry {
         }
 
         @Override
-        public CompletableFuture<Boolean> part(User user) {
-            boolean success = false;
+        public CompletableFuture<Void> part(User user) {
             if (member == user) {
                 member = null;
-                success = true;
+                return CompletableFuture.completedFuture(null);
             }
-            return CompletableFuture.completedFuture(success);
+            return Util.failedFuture(new NotOnChannelException());
         }
 
     }
