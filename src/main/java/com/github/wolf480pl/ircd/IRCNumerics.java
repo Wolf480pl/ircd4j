@@ -181,10 +181,10 @@ public class IRCNumerics {
         return numeric(ERR_TOOMANYCHANNELS, channel, "You have joined too many channels");
     }
 
-    public static final int ERR_WASNUSUCHNICK = 406;
+    public static final int ERR_WASNOSUCHNICK = 406;
 
-    public Message errWasNuSuchNick(String nick) {
-        return numeric(ERR_WASNUSUCHNICK, nick, "There was no such nickname");
+    public Message errWasNoSuchNick(String nick) {
+        return numeric(ERR_WASNOSUCHNICK, nick, "There was no such nickname");
     }
 
     public static final int ERR_TOOMANYTARGETS = 407;

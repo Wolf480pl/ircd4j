@@ -273,7 +273,7 @@ public class IRCCommands {
                 user.send(user.numerics().rplNoTopic(chanName));
             }
 
-            // names() sends numereics. Numerics contain the user's nick, so they need to be sent from his event loop,
+            // names() sends numerics. Numerics contain the user's nick, so they need to be sent from his event loop,
             // and channel.getMembers() may finish in any thread, so we need to use user.maybeEnqueue().
             user.maybeEnqueue(channel.getMembers()).thenAccept(names(user, chanName, true));
         });
