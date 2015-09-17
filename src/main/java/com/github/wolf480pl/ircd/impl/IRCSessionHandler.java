@@ -28,6 +28,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.wolf480pl.ircd.ChannelRegistry;
 import com.github.wolf480pl.ircd.Command;
 import com.github.wolf480pl.ircd.CommandRegistry;
 import com.github.wolf480pl.ircd.IRCCommands;
@@ -49,8 +50,8 @@ public class IRCSessionHandler implements SessionHandler, CommandRegistry {
     private final IRCCommands ircCmds;
     private final Function<Session, EventExecutor> executorProvider;
 
-    public IRCSessionHandler(Function<Session, EventExecutor> executorProvider, UserRegistry registry) {
-        this.ircCmds = new IRCCommands(registry);
+    public IRCSessionHandler(Function<Session, EventExecutor> executorProvider, UserRegistry registry, ChannelRegistry chanReg) {
+        this.ircCmds = new IRCCommands(registry, chanReg);
         ircCmds.register(this);
         this.executorProvider = executorProvider;
         // TODO Auto-generated constructor stub

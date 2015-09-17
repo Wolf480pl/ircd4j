@@ -109,6 +109,30 @@ public class IRCNumerics {
         return numeric(RPL_TRYAGAIN, command, "Command dropped. " + reason);
     }
 
+    public static final int RPL_NOTOPIC = 331;
+
+    public Message rplNoTopic(String channel) {
+        return numeric(RPL_NOTOPIC, channel, "No topic is set");
+    }
+
+    public static final int RPL_TOPIC = 332;
+
+    public Message rplTopic(String channel, String topic) {
+        return numeric(RPL_TOPIC, channel, topic);
+    }
+
+    public static final int RPL_NAMREPLY = 353;
+
+    public Message rplNamReply(String channel, String... members) {
+        return numeric(RPL_NAMREPLY, "=", channel, String.join(" ", members));
+    }
+
+    public static final int RPL_ENDOFNAMES = 366;
+
+    public Message rplEndOfNames(String channel) {
+        return numeric(RPL_ENDOFNAMES, channel, "End of NAMES list");
+    }
+
     public static final int RPL_MOTDSTART = 375;
 
     public Message rplMotdStart() {
@@ -245,6 +269,12 @@ public class IRCNumerics {
 
     public Message errNickCollision(String nick) {
         return numeric(ERR_NICKCOLLISION, nick, "Nickname collision KILL");
+    }
+
+    public static final int ERR_NOTONCHANNEL = 442;
+
+    public Message errNotOnChannel(String channel) {
+        return numeric(ERR_NOTONCHANNEL, channel, "You are not on that channel");
     }
 
     public static final int ERR_NEEDMOREPARAMS = 461;

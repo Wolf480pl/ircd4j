@@ -19,9 +19,12 @@
  */
 package com.github.wolf480pl.ircd;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.wolf480pl.ircd.util.AttributeKey;
@@ -29,13 +32,15 @@ import com.github.wolf480pl.ircd.util.ExHandler;
 
 public class IRCCommands {
     private final UserRegistry registry;
+    private final ChannelRegistry chanReg;
 
     public IRCCommands() {
-        this(null);
+        this(null, null);
     }
 
-    public IRCCommands(UserRegistry registry) {
+    public IRCCommands(UserRegistry registry, ChannelRegistry chanReg) {
         this.registry = registry;
+        this.chanReg = chanReg;
     }
 
     public void register(CommandRegistry handler) {
@@ -44,6 +49,9 @@ public class IRCCommands {
         handler.putCommand("QUIT", this::quit);
         handler.putCommand("PONG", (user, args)->{});
         handler.putCommand("PING", this::ping);
+        handler.putCommand("JOIN", this::join);
+        handler.putCommand("PART", this::part);
+        handler.putCommand("NAMES", this::names);
     }
 
     private static final AttributeKey<AtomicReference<RegistrationData>> ATTR_REGDATA = AttributeKey.valueOf(RegistrationData.class.getCanonicalName());
@@ -198,6 +206,121 @@ public class IRCCommands {
         }
         user.send(Message.withPrefix(we, "PONG", target, origin));
 
+    }
+
+    public void join(IRCUser user, List<String> args) {
+        if (args.size() < 1) {
+            user.send(user.numerics().errNeedMoreParams("JOIN"));
+            return;
+        }
+        String[] chans = args.get(0).split(",");
+        String[] keys = new String[chans.length];
+        if (args.size() >= 2) {
+            String[] k = args.get(1).split(",");
+            System.arraycopy(k, 0, keys, 0, Math.max(chans.length, k.length));
+        }
+
+        for (int i = 0; i < chans.length; ++i) {
+            join(user, chans[i], keys[i]);
+        }
+    }
+
+    public void part(IRCUser user, List<String> args) {
+        if (args.size() < 1) {
+            user.send(user.numerics().errNeedMoreParams("PART"));
+            return;
+        }
+
+        String[] chans = args.get(0).split(",");
+        for (String chan : chans) {
+            part(user, chan);
+        }
+    }
+
+    public void names(IRCUser user, List<String> args) {
+        if (args.isEmpty()) {
+            // TODO: can we get the list of all users and all channels somehow?
+            names(user, "*", false).accept(Collections.emptyList());
+            user.send(user.numerics().rplEndOfNames("*"));
+            return;
+        }
+
+        String[] chans = args.get(0).split(",");
+        for (String chan : chans) {
+            Channel channel = (chanReg != null) ? chanReg.getChannel(chan) : null;
+            if (channel != null) {
+                channel.getMembers().thenAccept(names(user, chan, true));
+            } else {
+                // This is the way to signalize non-existence of a channel per both RFCs
+                names(user, chan, true).accept(Collections.emptyList());
+            }
+        }
+
+    }
+
+    public void join(IRCUser user, String channel, String key) {
+        if (chanReg != null) {
+            Channel chan = chanReg.getChannel(channel);
+            if (chan != null) {
+                join(user, chan, key);
+                return;
+            }
+        }
+        user.send(user.numerics().errNoSuchChannel(channel));
+    }
+
+    public void join(IRCUser user, Channel channel, String key) {
+        user.maybeEnqueue(channel.join(user, key)).thenRun(() -> {
+            String chanName = channel.getName();
+            user.send(Message.withPrefix(user.getHostmask(), "JOIN", chanName));
+
+            String topic = channel.getTopic();
+            if (topic != null) {
+                user.send(user.numerics().rplTopic(chanName, topic));
+            } else {
+                user.send(user.numerics().rplNoTopic(chanName));
+            }
+
+            channel.getMembers().thenAccept(names(user, chanName, true));
+        }).exceptionally((ex) -> {
+            // TODO
+            return null;
+        });
+    }
+
+    public void part(IRCUser user, String chan) {
+        if (chanReg != null) {
+            Channel channel = chanReg.getChannel(chan);
+            if (channel != null) {
+                part(user, channel);
+                return;
+            }
+        }
+        user.send(user.numerics().errNoSuchChannel(chan));
+    }
+
+    public void part(IRCUser user, Channel channel) {
+        user.maybeEnqueue(channel.part(user)).thenAccept(success -> {
+            if (success) {
+                user.send(Message.withPrefix(user.getHostmask(), "PART", channel.getName()));
+            } else {
+                user.send(user.numerics().errNotOnChannel(channel.getName()));
+            }
+        });
+    }
+
+    public Consumer<Collection<User>> names(IRCUser user, String chanName, boolean sendEndOfNames) {
+        return members -> {
+            if (!members.isEmpty()) {
+                user.send(
+                        // TODO: Split it so that it fits in a message buffer
+                        //       The splitting might have to be done on the numerics side, because they are close to the message text
+                        user.numerics().rplNamReply(chanName, members.stream().map(member -> member.getNick()).toArray(String[]::new)));
+            }
+            if (sendEndOfNames) {
+                user.send(user.numerics().rplEndOfNames(chanName));
+            }
+        };
     }
 
     public void quit(IRCUser user, String reason) {
