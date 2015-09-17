@@ -84,14 +84,8 @@ public class IRCCommands {
                     user.send(user.numerics().errNicknameInUse(nick));
                 }
 
-            }).exceptionally((ExHandler<Void>) (Throwable t) -> {
-                if (!(t instanceof DropMessageException)) {
-                    throw t;
-                }
+            }).exceptionally(dropHandler(user, "NICK"));
 
-                user.maybeSend(user.numerics().rplTryAgain("NICK", (DropMessageException) t));
-                return null;
-            });
         } else {
             RegistrationData regdata = user.attr(ATTR_REGDATA, makeRegdata).get();
 
@@ -165,15 +159,7 @@ public class IRCCommands {
             luser(user);
             motd(user);
 
-        }).exceptionally((ExHandler<Void>) (Throwable t) -> {
-            if (!(t instanceof DropMessageException)) {
-                throw t;
-            }
-
-            // TODO: Should we differentiate between NICK and USER ?
-            user.maybeSend(user.numerics().rplTryAgain("NICK", (DropMessageException) t));
-            return null;
-        });
+        }).exceptionally(dropHandler(user, "NICK"));
     }
 
     public void quit(IRCUser user, List<String> args) {
@@ -249,7 +235,7 @@ public class IRCCommands {
         for (String chan : chans) {
             Channel channel = (chanReg != null) ? chanReg.getChannel(chan) : null;
             if (channel != null) {
-                channel.getMembers().thenAccept(names(user, chan, true));
+                user.maybeEnqueue(channel.getMembers()).thenAccept(names(user, chan, true));
             } else {
                 // This is the way to signalize non-existence of a channel per both RFCs
                 names(user, chan, true).accept(Collections.emptyList());
@@ -281,7 +267,9 @@ public class IRCCommands {
                 user.send(user.numerics().rplNoTopic(chanName));
             }
 
-            channel.getMembers().thenAccept(names(user, chanName, true));
+            // names() sends numereics. Numerics contain the user's nick, so they need to be sent from his event loop,
+            // and channel.getMembers() may finish in any thread, so we need to use user.maybeEnqueue().
+            user.maybeEnqueue(channel.getMembers()).thenAccept(names(user, chanName, true));
         }).exceptionally((ex) -> {
             // TODO
             return null;
@@ -366,6 +354,17 @@ public class IRCCommands {
     protected boolean verifyNick(String nick) {
         //TODO
         return true;
+    }
+
+    private static ExHandler<Void> dropHandler(IRCUser user, String command) {
+        return t -> {
+            if (!(t instanceof DropMessageException)) {
+                throw t;
+            }
+
+            user.maybeSend(user.numerics().rplTryAgain(command, (DropMessageException) t));
+            return null;
+        };
     }
 
     private static class RegistrationData {
